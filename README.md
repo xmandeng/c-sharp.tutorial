@@ -62,7 +62,7 @@ Demo numbers match the book's chapter numbers.
 | 12 | `Ch12Async.cs` | `async`/`await`, `Task.WhenAll` |
 | 13 | `Ch13Orders.cs` + `Orders/` | Everything together; dependency injection |
 
-Book chapters 14 to 16 cover the web API, the drills, and the interview quick reference.
+Book chapters 14 to 17 cover the web API, debugging in VS Code, the drills, and the interview quick reference.
 
 ## The web API
 
@@ -76,9 +76,21 @@ curl -X POST localhost:5239/orders -H 'Content-Type: application/json' \
      -d '{"customer":"Ada","lines":[{"sku":"MN-03","quantity":1}]}'
 ```
 
+## Debugging in VS Code
+
+Open the repo root folder in VS Code and install the recommended **C# Dev Kit** extension when prompted.
+The `.dotnet` folder must be on the PATH that VS Code sees (see Quick start).
+
+- Run and Debug view (Ctrl+Shift+D) offers three configurations: **Tutorial: one chapter** (asks for a
+  chapter number), **Tutorial: all chapters**, and **Web API**. F5 builds and starts the selected one.
+- F9 sets a breakpoint, F10 steps over, F11 steps into, Shift+F11 steps out.
+- Tests appear in the Testing view (flask icon), each with a Debug button.
+
+Chapter 15 of the book walks through a full session.
+
 ## Practising
 
-Chapter 15 of the book lists eight drills, from reading a failing test to adding an API endpoint.
+Chapter 16 of the book lists nine drills, from reading a failing test to using the debugger.
 Appendix A has the solutions. Work on a branch so you can compare or reset:
 
 ```bash

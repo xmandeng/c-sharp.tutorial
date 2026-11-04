@@ -59,8 +59,9 @@ ol.tight li, ul.tight li { margin-bottom: 0.08cm; }
     <div class="l1"><a href="#s12"><span class="num">12</span>Async and Await</a></div>
     <div class="l1"><a href="#s13"><span class="num">13</span>Walkthrough: The Order System</a></div>
     <div class="l1"><a href="#s14"><span class="num">14</span>Walkthrough: The Web API</a></div>
-    <div class="l1"><a href="#s15"><span class="num">15</span>Hands-on Drills</a></div>
-    <div class="l1"><a href="#s16"><span class="num">16</span>Interview Quick Reference</a></div>
+    <div class="l1"><a href="#s15"><span class="num">15</span>Debugging in VS Code</a></div>
+    <div class="l1"><a href="#s16"><span class="num">16</span>Hands-on Drills</a></div>
+    <div class="l1"><a href="#s17"><span class="num">17</span>Interview Quick Reference</a></div>
     <div class="l1"><a href="#sA"><span class="num">A</span>Drill Solutions</a></div>
   </div>
 
@@ -77,8 +78,9 @@ ol.tight li, ul.tight li { margin-bottom: 0.08cm; }
   <ul class="tight">
     <li>Read chapters 1, 4, 8, 9 and 13. They cover the topics of most interview questions.</li>
     <li>Skim chapter 10 (LINQ) and chapter 12 (async).</li>
-    <li>Do drills 1 to 3 in chapter 15 at a keyboard.</li>
-    <li>Read chapter 16 last, out loud.</li>
+    <li>Do the debugging session in section 15.3 in VS Code.</li>
+    <li>Do drills 1 to 3 in chapter 16 at a keyboard.</li>
+    <li>Read chapter 17 last, out loud.</li>
   </ul>
 </section>
 
@@ -1297,7 +1299,216 @@ curl -X POST localhost:5239/orders -H 'Content-Type: application/json' \
 
 <!-- ===================== 15 ===================== -->
 <section class="new-page">
-  <h2 class="section" id="s15"><span class="snum">15</span> Hands-on Drills</h2>
+  <h2 class="section" id="s15"><span class="snum">15</span> Debugging in VS Code</h2>
+  <p>A debugger pauses the running program at a line you choose. While it is paused, you can read every
+  variable and run the code one line at a time. VS Code debugs C# with the same panels and the same keys it
+  uses for Python, so if you have debugged Python in VS Code, only the setup is new.</p>
+
+  <h3 class="sub" id="s15-1">15.1&nbsp;&nbsp;One-Time Setup</h3>
+  <ul class="tight">
+    <li><strong>The C# Dev Kit extension</strong> (<code>ms-dotnettools.csdevkit</code>). It installs the C#
+    extension, which contains the .NET debugger. It is already installed on this machine. The repo's
+    <code>.vscode/extensions.json</code> recommends it, so VS Code offers to install it on any other machine.</li>
+    <li><strong>The .NET SDK on the PATH.</strong> <code>~/.profile</code> now adds <code>~/.dotnet</code>
+    to the PATH. VS Code reads that file only when its server starts. After a PATH change, run
+    <em>Remote-SSH: Kill VS Code Server on Host</em> from the Command Palette (Ctrl+Shift+P) and reconnect.</li>
+    <li><strong>Open the repo root folder</strong>: File &gt; Open Folder, then the folder that holds
+    <code>CSharpTutorial.slnx</code>. C# Dev Kit loads the solution and adds a Solution Explorer section to
+    the Explorer sidebar.</li>
+  </ul>
+
+  <h3 class="sub" id="s15-2">15.2&nbsp;&nbsp;Launch Configurations</h3>
+  <p>A <strong>launch configuration</strong> is a named entry in <code>.vscode/launch.json</code> that tells
+  VS Code which program to start under the debugger and with which arguments. The repo has three:</p>
+  <table class="data">
+    <thead><tr><th style="width:36%">Name</th><th>What it starts</th></tr></thead>
+    <tbody>
+      <tr><td>Tutorial: one chapter</td><td>The console app. VS Code asks for a chapter number (3 to 13); the default is 13, the order system.</td></tr>
+      <tr><td>Tutorial: all chapters</td><td>The console app with no arguments.</td></tr>
+      <tr><td>Web API</td><td>The API on <code>http://localhost:5239</code>.</td></tr>
+    </tbody>
+  </table>
+  <p>The fields in each entry:</p>
+:::cs .vscode/launch.json (one entry)
+{
+    "name": "Tutorial: one chapter",
+    "type": "coreclr",                // the .NET debugger
+    "request": "launch",              // start the program (not attach)
+    "preLaunchTask": "build",         // run dotnet build first
+    "program": "${workspaceFolder}/src/Tutorial/bin/Debug/net10.0/Tutorial.dll",
+    "args": ["${input:chapter}"],     // ask for the chapter number
+    "console": "integratedTerminal"
+}
+:::
+  <p>A Python configuration has the same shape with <code>"type": "debugpy"</code> and a <code>.py</code>
+  file in place of the <code>.dll</code>. <code>preLaunchTask</code> has no Python equivalent: C# must be
+  compiled before it can run, so every debug session starts with a build. The <code>build</code> task is
+  defined in <code>.vscode/tasks.json</code>; Ctrl+Shift+B runs it on its own.</p>
+
+  <h3 class="sub" id="s15-3">15.3&nbsp;&nbsp;A First Session</h3>
+  <p>This session pauses inside <code>OrderService.Checkout</code> and follows the discount calculation into
+  <code>BulkDiscount</code>.</p>
+  <ol class="tight">
+    <li>Open <code>src/Tutorial/Orders/OrderService.cs</code>. Click in the margin left of line 62,
+    <code>decimal discount = _discounts.DiscountFor(order);</code>. A red dot appears: a
+    <strong>breakpoint</strong>. F9 toggles one on the current line.</li>
+    <li>Open the Run and Debug view (Ctrl+Shift+D). Choose <em>Tutorial: one chapter</em> in the drop-down
+    and press F5. Press Enter to accept chapter 13.</li>
+    <li>The program builds, starts, and pauses on line 62, which is highlighted yellow. The highlighted line
+    has <em>not</em> run yet. In the Variables panel, <code>subtotal</code> is 50.00: this is ORD-1. Expand
+    <code>order</code>, then <code>Lines</code>, then <code>[0]</code> to see the mouse line.</li>
+    <li>Press F11 (step into). The debugger enters <code>BulkDiscount.DiscountFor</code>, because the
+    <code>IDiscountPolicy</code> passed in is a <code>BulkDiscount</code>. This is polymorphism (section 9.3)
+    happening in front of you. The Call Stack panel lists <code>BulkDiscount.DiscountFor</code>, then
+    <code>OrderService.Checkout</code>, <code>Ch13Orders.Run</code> and <code>Program.&lt;Main&gt;$</code>.</li>
+    <li>Press Shift+F11 (step out) to return to <code>Checkout</code>, then F10 (step over) to run line 63.
+    Hover over <code>tax</code>: it shows 4.00.</li>
+    <li>Press F5 (continue). The program pauses again on line 62 for ORD-2, where <code>subtotal</code> is
+    225.00. Press F5 again. ORD-3 fails its stock check before line 62, so the program runs to the end.</li>
+  </ol>
+  <table class="data">
+    <thead><tr><th style="width:20%">Key</th><th>Action</th><th style="width:26%">pdb command</th></tr></thead>
+    <tbody>
+      <tr><td class="c">F5</td><td>Start, or continue to the next breakpoint</td><td class="c">c</td></tr>
+      <tr><td class="c">F9</td><td>Toggle a breakpoint on the current line</td><td class="c">b 62</td></tr>
+      <tr><td class="c">F10</td><td>Step over: run this line, pause on the next</td><td class="c">n</td></tr>
+      <tr><td class="c">F11</td><td>Step into the method called on this line</td><td class="c">s</td></tr>
+      <tr><td class="c">Shift+F11</td><td>Step out: finish this method, pause in the caller</td><td class="c">r</td></tr>
+      <tr><td class="c">Shift+F5</td><td>Stop debugging</td><td class="c">q</td></tr>
+      <tr><td class="c">Ctrl+Shift+F5</td><td>Restart (rebuilds first)</td><td class="c">restart</td></tr>
+    </tbody>
+  </table>
+  <p>Visual Studio and JetBrains Rider, the other two C# IDEs, use the same F5, F9, F10 and F11 keys.</p>
+
+  <h3 class="sub" id="s15-4">15.4&nbsp;&nbsp;The Panels</h3>
+  <svg class="diagram" viewBox="0 0 620 352" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="'Nimbus Sans','Liberation Sans',sans-serif">
+    <rect x="4" y="4" width="612" height="344" rx="6" fill="#ffffff" stroke="#46647f" stroke-width="1.2"/>
+    <!-- sidebar -->
+    <rect x="4" y="4" width="196" height="344" rx="6" fill="#f3f6f9" stroke="#46647f" stroke-width="1.2"/>
+    <text x="14" y="24" font-size="11" font-weight="700" fill="#16273d">RUN AND DEBUG</text>
+    <rect x="14" y="31" width="176" height="20" rx="3" fill="#ffffff" stroke="#c4d4e6"/>
+    <text x="22" y="45" font-size="10.5" fill="#2f6b3f">&#9654;</text>
+    <text x="36" y="45" font-size="10.5" fill="#16273d">Tutorial: one chapter</text>
+    <text x="14" y="72" font-size="10.5" font-weight="700" fill="#1f3756">VARIABLES</text>
+    <text x="22" y="88" font-size="10.5" font-family="'Liberation Mono',monospace" fill="#1c1c1c">order    {Order}</text>
+    <text x="22" y="102" font-size="10.5" font-family="'Liberation Mono',monospace" fill="#1c1c1c">subtotal 50.00</text>
+    <text x="22" y="116" font-size="10.5" font-family="'Liberation Mono',monospace" fill="#1c1c1c">discount 0</text>
+    <text x="14" y="140" font-size="10.5" font-weight="700" fill="#1f3756">WATCH</text>
+    <text x="22" y="156" font-size="10.5" font-family="'Liberation Mono',monospace" fill="#1c1c1c">order.Id: "ORD-1"</text>
+    <text x="14" y="180" font-size="10.5" font-weight="700" fill="#1f3756">CALL STACK</text>
+    <text x="22" y="196" font-size="10.5" font-family="'Liberation Mono',monospace" fill="#1c1c1c">OrderService.Checkout</text>
+    <text x="22" y="210" font-size="10.5" font-family="'Liberation Mono',monospace" fill="#5b6470">Ch13Orders.Run</text>
+    <text x="22" y="224" font-size="10.5" font-family="'Liberation Mono',monospace" fill="#5b6470">Program.&lt;Main&gt;$</text>
+    <text x="14" y="248" font-size="10.5" font-weight="700" fill="#1f3756">BREAKPOINTS</text>
+    <text x="22" y="264" font-size="10.5" fill="#1c1c1c">&#9744; All Exceptions</text>
+    <text x="22" y="278" font-size="10.5" fill="#1c1c1c">&#9744; User-Unhandled Exceptions</text>
+    <text x="22" y="292" font-size="10.5" fill="#1c1c1c">&#9745; OrderService.cs  62</text>
+    <!-- toolbar -->
+    <rect x="300" y="12" width="232" height="24" rx="4" fill="#1f3756"/>
+    <text x="316" y="28" font-size="10.5" font-weight="700" fill="#ffffff">F5</text>
+    <text x="346" y="28" font-size="10.5" font-weight="700" fill="#ffffff">F10</text>
+    <text x="380" y="28" font-size="10.5" font-weight="700" fill="#ffffff">F11</text>
+    <text x="414" y="28" font-size="10.5" font-weight="700" fill="#ffffff">&#8679;F11</text>
+    <text x="456" y="28" font-size="10.5" font-weight="700" fill="#ffffff">&#10227;</text>
+    <text x="484" y="28" font-size="10.5" font-weight="700" fill="#ffffff">&#8679;F5</text>
+    <!-- editor -->
+    <text x="212" y="62" font-size="10.5" font-weight="700" fill="#5b6470">OrderService.cs</text>
+    <text x="232" y="88" font-size="10.5" text-anchor="end" font-family="'Liberation Mono',monospace" fill="#8a96a3">61</text>
+    <text x="244" y="88" font-size="10.5" font-family="'Liberation Mono',monospace" fill="#1c1c1c">decimal subtotal = order.Subtotal;</text>
+    <rect x="238" y="94" width="372" height="18" fill="#fff4c2"/>
+    <circle cx="214" cy="103" r="5" fill="#c0392b"/>
+    <text x="232" y="107" font-size="10.5" text-anchor="end" font-family="'Liberation Mono',monospace" fill="#8a96a3">62</text>
+    <text x="244" y="107" font-size="10.5" font-family="'Liberation Mono',monospace" fill="#1c1c1c">decimal discount = _discounts.DiscountFor(order);</text>
+    <text x="232" y="126" font-size="10.5" text-anchor="end" font-family="'Liberation Mono',monospace" fill="#8a96a3">63</text>
+    <text x="244" y="126" font-size="10.5" font-family="'Liberation Mono',monospace" fill="#1c1c1c">decimal tax = Math.Round(...);</text>
+    <text x="244" y="160" font-size="11" fill="#c0392b">red dot = breakpoint</text>
+    <text x="244" y="176" font-size="11" fill="#9a7a00">yellow line = next line to run</text>
+    <!-- debug console -->
+    <line x1="200" y1="252" x2="616" y2="252" stroke="#46647f" stroke-width="1.2"/>
+    <text x="212" y="270" font-size="10.5" font-weight="700" fill="#1f3756">DEBUG CONSOLE</text>
+    <text x="212" y="288" font-size="10.5" font-family="'Liberation Mono',monospace" fill="#1c1c1c">&gt; order.Lines.Count</text>
+    <text x="212" y="302" font-size="10.5" font-family="'Liberation Mono',monospace" fill="#2f6b3f">1</text>
+    <text x="212" y="320" font-size="10.5" font-family="'Liberation Mono',monospace" fill="#1c1c1c">&gt; subtotal * 2</text>
+    <text x="212" y="334" font-size="10.5" font-family="'Liberation Mono',monospace" fill="#2f6b3f">100.00</text>
+  </svg>
+  <p class="caption">Figure 6. The VS Code debugger paused at the breakpoint from section 15.3 (simplified).</p>
+  <ul class="tight">
+    <li><strong>Variables</strong>: the local variables and parameters of the paused method. Click the arrow next to
+    an object to see its properties. Double-click a value to change it.</li>
+    <li><strong>Watch</strong>: expressions you add, re-evaluated at every pause, such as <code>order.Id</code>
+    or <code>_inventory.StockOf("MN-03")</code>.</li>
+    <li><strong>Call Stack</strong>: the chain of method calls that led to this line, newest on top. Click a lower
+    entry to see that method's variables. pdb's <code>where</code> prints the same list.</li>
+    <li><strong>Breakpoints</strong>: every breakpoint, plus two exception switches (section 15.5).</li>
+    <li><strong>Debug Console</strong>: type a C# expression while paused and press Enter to see its value. It
+    plays the role of pdb's <code>p</code> command.</li>
+  </ul>
+
+  <h3 class="sub" id="s15-5">15.5&nbsp;&nbsp;Breakpoints That Do More</h3>
+  <ul class="tight">
+    <li><strong>Conditional breakpoint.</strong> Right-click a red dot and choose Edit Breakpoint. Enter a C#
+    expression, such as <code>order.Customer == "Grace"</code>. The debugger then pauses only when the expression
+    is true, here only for ORD-2.</li>
+    <li><strong>Logpoint.</strong> Right-click the margin and choose Add Logpoint. Enter a message with
+    expressions in braces: <code>checkout {order.Id}: {subtotal}</code>. The message prints to the Debug Console
+    and the program does not pause. It adds a print statement without editing the code.</li>
+    <li><strong>Exception breakpoints.</strong> In the Breakpoints panel, tick <em>All Exceptions</em>. The
+    debugger then pauses on any <code>throw</code>, before a <code>catch</code> runs. Run chapter 13 with it ticked:
+    it pauses on the <code>throw new OrderException</code> for ORD-3, with the stock numbers in Variables.
+    <em>User-Unhandled Exceptions</em> pauses only on exceptions your code does not catch.</li>
+    <li><strong>A breakpoint in code.</strong> <code>System.Diagnostics.Debugger.Break();</code> pauses there,
+    like Python's <code>breakpoint()</code>. Use it only while running under the debugger, and delete it afterwards.</li>
+  </ul>
+
+  <h3 class="sub" id="s15-6">15.6&nbsp;&nbsp;Debugging a Test</h3>
+  <p>C# Dev Kit finds every xUnit test and lists it in the Testing view, the flask icon in the Activity Bar.
+  Each test has a Run button and a Debug button. In the editor, an icon appears in the margin next to each
+  <code>[Fact]</code>; right-click it and choose Debug Test.</p>
+  <ol class="tight">
+    <li>Open <code>tests/Tutorial.Tests/OrderServiceTests.cs</code> and set a breakpoint on line 55,
+    <code>var ex = Assert.Throws&lt;OrderException&gt;(...)</code>.</li>
+    <li>Debug <code>Checkout_NotEnoughStock_ThrowsAndLeavesStockAlone</code>.</li>
+    <li>When it pauses, press F11 to step into <code>Checkout</code> and watch the stock check fail for the
+    monitor line.</li>
+  </ol>
+  <p>This is the fastest way to explore unfamiliar code: find a test that exercises it, set a breakpoint, and
+  step through with real values.</p>
+
+  <h3 class="sub" id="s15-7">15.7&nbsp;&nbsp;Debugging the Web API</h3>
+  <ol class="tight">
+    <li>In <code>src/Tutorial.Api/Program.cs</code>, set a breakpoint on line 40, <code>var order = new Order(...)</code>.</li>
+    <li>Choose <em>Web API</em> and press F5. Wait for <code>Now listening on: http://localhost:5239</code>
+    in the terminal.</li>
+    <li>In a second terminal, send an order with the <code>curl -X POST</code> command from section 14.3.</li>
+    <li>VS Code pauses on line 40. In Variables, <code>request</code> already holds the JSON body, converted into an
+    <code>OrderRequest</code> record. <code>curl</code> waits until you press F5.</li>
+  </ol>
+
+  <h3 class="sub" id="s15-8">15.8&nbsp;&nbsp;Reading a Stack Trace</h3>
+  <p>When an exception is never caught, .NET prints a <strong>stack trace</strong> and stops the program. Run
+  <code>dotnet run --project src/Tutorial -- 99</code>; there is no chapter 99:</p>
+:::out
+Unhandled exception. System.Collections.Generic.KeyNotFoundException:
+    The given key '99' was not present in the dictionary.
+   at System.Collections.Generic.Dictionary`2.get_Item(TKey key)
+   at Program.<Main>$(String[] args) in .../src/Tutorial/Program.cs:line 30
+   at Program.<Main>(String[] args)
+:::
+  <ul class="tight">
+    <li>The first line is the exception type and its message.</li>
+    <li>Each <code>at</code> line is one method call, <strong>newest first</strong>. Python prints its traceback
+    in the opposite order ("most recent call last").</li>
+    <li>Read down to the first line in your own code, here <code>Program.cs:line 30</code>, which is
+    <code>titles[chapter]</code>. Lines from <code>System.*</code> are the library code you called.</li>
+    <li><code>Program.&lt;Main&gt;$</code> is the hidden <code>Main</code> method that the compiler creates for
+    top-level statements. <code>Dictionary`2</code> means the generic <code>Dictionary</code> with two type
+    parameters.</li>
+  </ul>
+</section>
+
+<!-- ===================== 16 ===================== -->
+<section class="new-page">
+  <h2 class="section" id="s16"><span class="snum">16</span> Hands-on Drills</h2>
   <p>Each drill is a small change to the companion project, ordered from easiest to hardest. Run the
   stated command after each change. Solutions are in appendix A. Before starting, check that the project is
   clean: <code>dotnet test</code> should report 8 passed.</p>
@@ -1305,7 +1516,7 @@ curl -X POST localhost:5239/orders -H 'Content-Type: application/json' \
   <code>git checkout -- .</code> restores every file to its committed state. To keep your answers instead,
   work on a branch: <code>git switch -c drills</code>.</div>
 
-  <h3 class="sub" id="s15-1">15.1&nbsp;&nbsp;Drill 1: Read a Failing Test</h3>
+  <h3 class="sub" id="s16-1">16.1&nbsp;&nbsp;Drill 1: Read a Failing Test</h3>
   <p>In <code>Orders/OrderService.cs</code>, change <code>TaxRate</code> from <code>0.08m</code> to <code>0.10m</code>.</p>
   <ul class="tight">
     <li>Predict the new totals for ORD-1 and ORD-2, then check with <code>dotnet run --project src/Tutorial -- 13</code>.</li>
@@ -1314,7 +1525,7 @@ curl -X POST localhost:5239/orders -H 'Content-Type: application/json' \
     <li>Change the rate back.</li>
   </ul>
 
-  <h3 class="sub" id="s15-2">15.2&nbsp;&nbsp;Drill 2: Read Compiler Errors</h3>
+  <h3 class="sub" id="s16-2">16.2&nbsp;&nbsp;Drill 2: Read Compiler Errors</h3>
   <p>Make each change to <code>Ch03Basics.cs</code> on its own, run <code>dotnet build</code>, read the error,
   and undo it. The error format is <code>File(line,column): error CODE: message</code>.</p>
   <table class="data">
@@ -1327,7 +1538,7 @@ curl -X POST localhost:5239/orders -H 'Content-Type: application/json' \
     </tbody>
   </table>
 
-  <h3 class="sub" id="s15-3">15.3&nbsp;&nbsp;Drill 3: Find a Bug with a Test</h3>
+  <h3 class="sub" id="s16-3">16.3&nbsp;&nbsp;Drill 3: Find a Bug with a Test</h3>
   <p><code>BankAccount.Withdraw</code> accepts a negative amount, and <code>Withdraw(-50m)</code> adds money.
   <code>Deposit</code> rejects non-positive amounts, but <code>Withdraw</code> does not.</p>
   <ol class="tight">
@@ -1337,19 +1548,19 @@ curl -X POST localhost:5239/orders -H 'Content-Type: application/json' \
     <li>Fix <code>Withdraw</code> and watch it pass. This order (failing test, then fix) is test-driven development.</li>
   </ol>
 
-  <h3 class="sub" id="s15-4">15.4&nbsp;&nbsp;Drill 4: Add a Method</h3>
+  <h3 class="sub" id="s16-4">16.4&nbsp;&nbsp;Drill 4: Add a Method</h3>
   <p>Add <code>public void TransferTo(BankAccount other, decimal amount)</code> to <code>BankAccount</code>.
   It moves money from this account to <code>other</code>. Add a test that transfers 40 from an account
   holding 100 and checks both balances. Hint: reuse <code>Withdraw</code> and <code>Deposit</code>.</p>
 
-  <h3 class="sub" id="s15-5">15.5&nbsp;&nbsp;Drill 5: A New Subclass</h3>
+  <h3 class="sub" id="s16-5">16.5&nbsp;&nbsp;Drill 5: A New Subclass</h3>
   <p>In <code>Ch09Interfaces.cs</code>, add a <code>Triangle</code> class that inherits from <code>Shape</code>,
   with a base length and a height. Area is half of base times height. Add <code>new Triangle(3, 4)</code> to
   the <code>shapes</code> list. Expected new output lines: <code>Triangle with area 6.00</code> and
   <code>Total area: 19.14</code>.</p>
   <p>Note: <code>base</code> is a keyword, so a parameter cannot be named <code>base</code>. Use <code>baseLength</code>.</p>
 
-  <h3 class="sub" id="s15-6">15.6&nbsp;&nbsp;Drill 6: A LINQ Query</h3>
+  <h3 class="sub" id="s16-6">16.6&nbsp;&nbsp;Drill 6: A LINQ Query</h3>
   <p>In <code>Ch10Linq.Run</code>, print the highest-paid employee in each department. Expected output:</p>
 :::out
 Top in Engineering: Grace
@@ -1358,7 +1569,7 @@ Top in Finance: Barbara
 :::
   <p>Hint: <code>GroupBy</code>, then for each group sort by salary, highest first, and take the first.</p>
 
-  <h3 class="sub" id="s15-7">15.7&nbsp;&nbsp;Drill 7: A New Discount Rule</h3>
+  <h3 class="sub" id="s16-7">16.7&nbsp;&nbsp;Drill 7: A New Discount Rule</h3>
   <p>In <code>Orders/Discounts.cs</code>, write <code>LoyaltyDiscount</code>, an <code>IDiscountPolicy</code>
   that gives 5% off to customers whose names are in a set passed to its constructor. In <code>Ch13Orders.cs</code>,
   pass <code>new LoyaltyDiscount(new[] { "Ada" })</code> instead of <code>new BulkDiscount()</code>.
@@ -1370,7 +1581,7 @@ ORD-2: subtotal 225.00 - discount 0.00 + tax 18.00 = 243.00
   <p>Afterwards, say in one sentence why <code>OrderService</code> did not need to change. That sentence is
   an interview answer about interfaces and dependency injection.</p>
 
-  <h3 class="sub" id="s15-8">15.8&nbsp;&nbsp;Drill 8: A New Endpoint</h3>
+  <h3 class="sub" id="s16-8">16.8&nbsp;&nbsp;Drill 8: A New Endpoint</h3>
   <p>In <code>src/Tutorial.Api/Program.cs</code>, add <code>POST /stock/{sku}/{quantity}</code>, which restocks
   a product and returns the new stock level. Place it before <code>app.Run()</code>. Restart the server, then test it (a fresh server
   holds 5 monitors):</p>
@@ -1378,15 +1589,21 @@ ORD-2: subtotal 225.00 - discount 0.00 + tax 18.00 = 243.00
 curl -X POST localhost:5239/stock/MN-03/10
 {"sku":"MN-03","inStock":15}
 :::
+
+  <h3 class="sub" id="s16-9">16.9&nbsp;&nbsp;Drill 9: Use the Debugger</h3>
+  <p>Without adding any code, find the discount and tax that ORD-2 receives. Set a conditional breakpoint
+  on line 63 of <code>OrderService.cs</code> with the condition <code>order.Id == "ORD-2"</code>. Run
+  <em>Tutorial: one chapter</em> with chapter 13. When it pauses, read <code>discount</code> in Variables
+  (expected: 22.50), then press F10 and read <code>tax</code> (expected: 16.20).</p>
 </section>
 
-<!-- ===================== 16 ===================== -->
+<!-- ===================== 17 ===================== -->
 <section class="new-page">
-  <h2 class="section" id="s16"><span class="snum">16</span> Interview Quick Reference</h2>
+  <h2 class="section" id="s17"><span class="snum">17</span> Interview Quick Reference</h2>
   <p>Each answer below is short enough to say aloud. Each one points to the example in the companion
   project that you can describe.</p>
 
-  <h3 class="sub" id="s16-1">16.1&nbsp;&nbsp;Likely Questions</h3>
+  <h3 class="sub" id="s17-1">17.1&nbsp;&nbsp;Likely Questions</h3>
 
   <div class="qa"><div class="q">What is the difference between a value type and a reference type?</div>
   <p>A value type variable holds its data, and assignment copies it: numbers, <code>bool</code>,
@@ -1474,12 +1691,17 @@ curl -X POST localhost:5239/stock/MN-03/10
   subscribe to with <code>+=</code> or unsubscribe from with <code>-=</code>; the owning class calls the
   subscribers when something happens. Events are common in UI code. Python's closest match is passing callback functions.</p></div>
 
+  <div class="qa"><div class="q">How do you debug a problem?</div>
+  <p>Reproduce it first, ideally with a failing test. Read the stack trace from the top down to the first line
+  in our own code. Set a breakpoint there, run under the debugger, and step through while watching the
+  variables. To find where an exception starts, turn on breaking on all exceptions. (Chapter 15.)</p></div>
+
   <div class="qa"><div class="q">How would you test this class?</div>
   <p>With xUnit: one <code>[Fact]</code> per behaviour, each following arrange, act, assert. Pass fake
   dependencies through the constructor; a library such as Moq creates them from interfaces.
   <code>OrderServiceTests</code> is the example.</p></div>
 
-  <h3 class="sub" id="s16-2">16.2&nbsp;&nbsp;Talking About Your Background</h3>
+  <h3 class="sub" id="s17-2">17.2&nbsp;&nbsp;Talking About Your Background</h3>
   <div class="callout">
     <div class="hd">Suggested answer</div>
     <p>Say that your strongest language is Python, and that you have studied C# and can read it and make
@@ -1489,7 +1711,7 @@ curl -X POST localhost:5239/stock/MN-03/10
     thing more than a broad claim.</p>
   </div>
 
-  <h3 class="sub" id="s16-3">16.3&nbsp;&nbsp;Reading Unfamiliar C# Code</h3>
+  <h3 class="sub" id="s17-3">17.3&nbsp;&nbsp;Reading Unfamiliar C# Code</h3>
   <ol class="tight">
     <li>Open the <code>.csproj</code>: target framework (<code>net48</code> means .NET Framework,
     <code>net8.0</code> or later means modern .NET) and package references.</li>
@@ -1503,7 +1725,7 @@ curl -X POST localhost:5239/stock/MN-03/10
     <li>Read the tests. Test names state the intended behaviour in plain words.</li>
   </ol>
 
-  <h3 class="sub" id="s16-4">16.4&nbsp;&nbsp;Glossary</h3>
+  <h3 class="sub" id="s17-4">17.4&nbsp;&nbsp;Glossary</h3>
   <table class="data">
     <thead><tr><th style="width:25%">Term</th><th>Meaning</th></tr></thead>
     <tbody>
@@ -1529,7 +1751,7 @@ curl -X POST localhost:5239/stock/MN-03/10
 <section class="new-page">
   <h2 class="section" id="sA"><span class="snum">A</span> Drill Solutions</h2>
   <p>Each solution below was applied to a copy of the project and built. With all of them in place, all 10 tests pass
-  and the outputs match those stated in chapter 15.</p>
+  and the outputs match those stated in chapter 16.</p>
 
   <h3 class="sub" id="sA-1">A.1&nbsp;&nbsp;Drill 1</h3>
   <p>ORD-1: tax 5.00, total 55.00. ORD-2: tax 20.25, total 222.75. <code>dotnet test</code> reports:</p>

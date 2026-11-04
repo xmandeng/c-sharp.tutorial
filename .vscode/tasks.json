@@ -1,0 +1,30 @@
+{
+    // Ctrl+Shift+B runs "build". Terminal > Run Task... lists both.
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build",
+            "type": "process",
+            "command": "dotnet",
+            "args": [
+                "build",
+                "${workspaceFolder}/CSharpTutorial.slnx",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:NoSummary"
+            ],
+            "problemMatcher": "$msCompile",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "test",
+            "type": "process",
+            "command": "dotnet",
+            "args": ["test", "${workspaceFolder}/CSharpTutorial.slnx"],
+            "problemMatcher": "$msCompile",
+            "group": "test"
+        }
+    ]
+}

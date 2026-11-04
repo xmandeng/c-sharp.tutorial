@@ -1,0 +1,50 @@
+{
+    // Debug configurations. Pick one in the Run and Debug view, then press F5.
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Tutorial: one chapter",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/src/Tutorial/bin/Debug/net10.0/Tutorial.dll",
+            "args": ["${input:chapter}"],
+            "cwd": "${workspaceFolder}/src/Tutorial",
+            "console": "integratedTerminal",
+            "stopAtEntry": false
+        },
+        {
+            "name": "Tutorial: all chapters",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/src/Tutorial/bin/Debug/net10.0/Tutorial.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/src/Tutorial",
+            "console": "integratedTerminal",
+            "stopAtEntry": false
+        },
+        {
+            "name": "Web API",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/src/Tutorial.Api/bin/Debug/net10.0/Tutorial.Api.dll",
+            "args": ["--urls", "http://localhost:5239"],
+            "cwd": "${workspaceFolder}/src/Tutorial.Api",
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Development"
+            },
+            "console": "integratedTerminal",
+            "stopAtEntry": false
+        }
+    ],
+    "inputs": [
+        {
+            "id": "chapter",
+            "type": "promptString",
+            "description": "Book chapter to run (3 to 13)",
+            "default": "13"
+        }
+    ]
+}
