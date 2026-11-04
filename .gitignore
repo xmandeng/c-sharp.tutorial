@@ -1,0 +1,17 @@
+# .NET build output
+bin/
+obj/
+TestResults/
+*.user
+.vs/
+.idea/
+
+# Generated textbook intermediate (book.src.html is the source)
+docs/book/book.html
+
+# Python
+__pycache__/
+
+# Claude Code: local secrets and worktrees
+.claude/settings.local.json
+.claude/worktrees/

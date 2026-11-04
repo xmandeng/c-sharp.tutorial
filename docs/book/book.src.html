@@ -1,0 +1,1669 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="textbook.css">
+<style>
+.codewrap { break-inside: avoid; margin: 0.25cm 0 0.3cm; }
+.codewrap .codeblock { margin-top: 0; border-top-left-radius: 0; }
+.codehd { display: inline-block; font-family: 'Nimbus Sans','Liberation Sans',sans-serif;
+  font-size: 7.5pt; font-weight: 700; letter-spacing: 0.04em; color: #fff;
+  padding: 1px 8px; border-radius: 3px 3px 0 0; background: #1f3756; }
+.codehd.py { background: #2f6b3f; }
+.codehd.out { background: #5b6470; }
+.codeblock .st { color: #a8d5a2; }
+table.data code { font-size: 8.5pt; }
+table.data td.c, table.data td.c code { font-family: 'Liberation Mono','Nimbus Mono PS',monospace; font-size: 8.5pt; }
+ol.tight li, ul.tight li { margin-bottom: 0.08cm; }
+.qa { break-inside: avoid; margin: 0 0 0.3cm; }
+.qa .q { font-family: 'Nimbus Sans','Liberation Sans',sans-serif; font-weight: 700; color: #1f3756; font-size: 10.5pt; }
+.qa p { margin: 0.06cm 0 0; }
+</style>
+<title>C# for Python Developers</title>
+</head>
+<body>
+
+<!-- ===================== TITLE PAGE ===================== -->
+<section class="title-page">
+  <div class="eyebrow">Interview Preparation &middot; C# and .NET</div>
+  <div class="rule-gold"></div>
+  <div class="doc-title">C# for Python Developers</div>
+  <div class="doc-subtitle">The core language, read through working code</div>
+  <div class="rule-gold"></div>
+  <p class="abstract">This book teaches enough C# to read, change and discuss
+  real code in an interview. Every chapter walks through a file in the companion
+  project and shows the Python you would write for the same job. The last
+  chapters are hands-on drills and a list of interview questions with short
+  answers.</p>
+  <div class="title-footer">
+    Study Guide &middot; Generated 4 November 2026<br>
+    Companion code: <code>~/repo/c.tutorial/</code> &middot; .NET 10, C# 14
+  </div>
+</section>
+
+<!-- ===================== CONTENTS ===================== -->
+<section class="contents-page">
+  <h1 class="contents-h">Contents</h1>
+  <div class="toc">
+    <div class="l1"><a href="#s1"><span class="num">1</span>What C# and .NET Are</a></div>
+    <div class="l1"><a href="#s2"><span class="num">2</span>The Companion Project</a></div>
+    <div class="l1"><a href="#s3"><span class="num">3</span>Syntax Basics</a></div>
+    <div class="l1"><a href="#s4"><span class="num">4</span>Types and Variables</a></div>
+    <div class="l1"><a href="#s5"><span class="num">5</span>Control Flow</a></div>
+    <div class="l1"><a href="#s6"><span class="num">6</span>Collections and Generics</a></div>
+    <div class="l1"><a href="#s7"><span class="num">7</span>Methods</a></div>
+    <div class="l1"><a href="#s8"><span class="num">8</span>Classes, Records and Structs</a></div>
+    <div class="l1"><a href="#s9"><span class="num">9</span>Inheritance and Interfaces</a></div>
+    <div class="l1"><a href="#s10"><span class="num">10</span>LINQ</a></div>
+    <div class="l1"><a href="#s11"><span class="num">11</span>Exceptions and Cleanup</a></div>
+    <div class="l1"><a href="#s12"><span class="num">12</span>Async and Await</a></div>
+    <div class="l1"><a href="#s13"><span class="num">13</span>Walkthrough: The Order System</a></div>
+    <div class="l1"><a href="#s14"><span class="num">14</span>Walkthrough: The Web API</a></div>
+    <div class="l1"><a href="#s15"><span class="num">15</span>Hands-on Drills</a></div>
+    <div class="l1"><a href="#s16"><span class="num">16</span>Interview Quick Reference</a></div>
+    <div class="l1"><a href="#sA"><span class="num">A</span>Drill Solutions</a></div>
+  </div>
+
+  <h3 class="sub" style="margin-top:0.7cm">Audience and Scope</h3>
+  <p>The reader writes Python and has not used C#. The goal is working fluency
+  for an interview: read unfamiliar C#, make small changes, run the tests, and
+  explain the core ideas in the right vocabulary. The goal is not to become a
+  C# developer overnight.</p>
+  <p>Every C# listing labelled with a file path is copied from the companion
+  project, which builds without warnings, and all 8 of its tests pass. Program output shown
+  in the book is the real output of <code>dotnet run</code>.</p>
+
+  <h3 class="sub">If You Have Two Hours</h3>
+  <ul class="tight">
+    <li>Read chapters 1, 4, 8, 9 and 13. They cover the topics of most interview questions.</li>
+    <li>Skim chapter 10 (LINQ) and chapter 12 (async).</li>
+    <li>Do drills 1 to 3 in chapter 15 at a keyboard.</li>
+    <li>Read chapter 16 last, out loud.</li>
+  </ul>
+</section>
+
+<!-- ===================== 1 ===================== -->
+<section class="new-page">
+  <h2 class="section" id="s1"><span class="snum">1</span> What C# and .NET Are</h2>
+  <p>C# is a statically typed, object-oriented language from Microsoft, first
+  released in 2002. "Statically typed" means every variable's type is fixed and
+  checked when the program is compiled, before it runs. .NET is the platform
+  that compiles and runs C# code. People often say "C#" and ".NET" as if they were
+  one thing; in an interview, use "C#" for the language and ".NET" for everything
+  around it.</p>
+
+  <h3 class="sub" id="s1-1">1.1&nbsp;&nbsp;The Pieces</h3>
+  <p>The table lists the five parts of .NET that interviewers name, with the nearest Python equivalent of each.</p>
+  <table class="data">
+    <thead><tr><th style="width:26%">Piece</th><th>What it is</th><th style="width:24%">Python analogue</th></tr></thead>
+    <tbody>
+      <tr><td><strong>C#</strong></td><td>The language: its syntax and rules.</td><td>Python the language</td></tr>
+      <tr><td><strong>CLR</strong></td><td>Common Language Runtime. The program that loads compiled code, runs it, and frees unused memory (garbage collection).</td><td>The CPython interpreter</td></tr>
+      <tr><td><strong>Base Class Library</strong></td><td>The built-in library: collections, files, HTTP, JSON, threads.</td><td>The standard library</td></tr>
+      <tr><td><strong>.NET SDK</strong></td><td>The <code>dotnet</code> command: create, build, run, test and package projects.</td><td><code>python</code>, <code>pip</code>, <code>uv</code>, <code>pytest</code> together</td></tr>
+      <tr><td><strong>NuGet</strong></td><td>The public package registry, at nuget.org.</td><td>PyPI</td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="sub" id="s1-2">1.2&nbsp;&nbsp;How a C# Program Runs</h3>
+  <p>C# is compiled in two steps, and the first step catches most mistakes.
+  <code>dotnet build</code> runs the C# compiler, which checks every type
+  in every file and refuses to produce output if any check fails. The output is a
+  <code>.dll</code> file of IL (Intermediate Language), a CPU-independent
+  instruction set. While the program runs, the CLR's JIT (just-in-time)
+  compiler turns each method's IL into machine code for the current CPU the first time the method is called.</p>
+  <p>Python finds a type mistake only when the faulty line runs. C# finds it before
+  the program can start. This is the largest practical difference between
+  the two languages, and the reason C# code contains so many type names.</p>
+
+  <svg class="diagram" viewBox="0 0 620 318" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="'Nimbus Sans','Liberation Sans',sans-serif">
+    <defs>
+      <marker id="a1" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1f3756"/></marker>
+    </defs>
+    <text x="130" y="18" text-anchor="middle" font-size="14" font-weight="700" fill="#2f6b3f">Python</text>
+    <text x="490" y="18" text-anchor="middle" font-size="14" font-weight="700" fill="#1f3756">C#</text>
+    <!-- python column -->
+    <rect x="20" y="32" width="220" height="44" rx="7" fill="#eef7f0" stroke="#2f6b3f" stroke-width="1.5"/>
+    <text x="130" y="52" text-anchor="middle" font-size="13" font-weight="700" font-family="'Liberation Mono',monospace" fill="#16273d">hello.py</text>
+    <text x="130" y="68" text-anchor="middle" font-size="11" fill="#5b6470">source text</text>
+    <line x1="130" y1="76" x2="130" y2="104" stroke="#1f3756" stroke-width="1.5" marker-end="url(#a1)"/>
+    <rect x="20" y="106" width="220" height="44" rx="7" fill="#eef7f0" stroke="#2f6b3f" stroke-width="1.5"/>
+    <text x="130" y="126" text-anchor="middle" font-size="13" font-weight="700" font-family="'Liberation Mono',monospace" fill="#16273d">python hello.py</text>
+    <text x="130" y="142" text-anchor="middle" font-size="11" fill="#5b6470">compiles to bytecode at start-up</text>
+    <line x1="130" y1="150" x2="130" y2="178" stroke="#1f3756" stroke-width="1.5" marker-end="url(#a1)"/>
+    <rect x="20" y="180" width="220" height="44" rx="7" fill="#eef7f0" stroke="#2f6b3f" stroke-width="1.5"/>
+    <text x="130" y="200" text-anchor="middle" font-size="13" font-weight="700" fill="#16273d">CPython interpreter</text>
+    <text x="130" y="216" text-anchor="middle" font-size="11" fill="#5b6470">runs the bytecode</text>
+    <rect x="20" y="250" width="220" height="44" rx="7" fill="#fcf0f0" stroke="#b03a3a" stroke-width="1.5"/>
+    <text x="130" y="270" text-anchor="middle" font-size="12" font-weight="700" fill="#b03a3a">Type errors found here,</text>
+    <text x="130" y="286" text-anchor="middle" font-size="12" font-weight="700" fill="#b03a3a">when the bad line runs</text>
+    <line x1="130" y1="224" x2="130" y2="248" stroke="#b03a3a" stroke-width="1.5" stroke-dasharray="4 3"/>
+    <!-- c# column -->
+    <rect x="380" y="32" width="220" height="44" rx="7" fill="#eef3f9" stroke="#1f3756" stroke-width="1.5"/>
+    <text x="490" y="52" text-anchor="middle" font-size="13" font-weight="700" font-family="'Liberation Mono',monospace" fill="#16273d">Program.cs</text>
+    <text x="490" y="68" text-anchor="middle" font-size="11" fill="#5b6470">source text</text>
+    <line x1="490" y1="76" x2="490" y2="104" stroke="#1f3756" stroke-width="1.5" marker-end="url(#a1)"/>
+    <rect x="380" y="106" width="220" height="44" rx="7" fill="#eef3f9" stroke="#1f3756" stroke-width="1.5"/>
+    <text x="490" y="126" text-anchor="middle" font-size="13" font-weight="700" font-family="'Liberation Mono',monospace" fill="#16273d">dotnet build</text>
+    <text x="490" y="142" text-anchor="middle" font-size="11" fill="#5b6470">C# compiler checks every type</text>
+    <line x1="490" y1="150" x2="490" y2="178" stroke="#1f3756" stroke-width="1.5" marker-end="url(#a1)"/>
+    <rect x="380" y="180" width="220" height="44" rx="7" fill="#eef3f9" stroke="#1f3756" stroke-width="1.5"/>
+    <text x="490" y="200" text-anchor="middle" font-size="13" font-weight="700" font-family="'Liberation Mono',monospace" fill="#16273d">Tutorial.dll</text>
+    <text x="490" y="216" text-anchor="middle" font-size="11" fill="#5b6470">IL (Intermediate Language)</text>
+    <line x1="490" y1="224" x2="490" y2="248" stroke="#1f3756" stroke-width="1.5" marker-end="url(#a1)"/>
+    <rect x="380" y="250" width="220" height="44" rx="7" fill="#eef3f9" stroke="#1f3756" stroke-width="1.5"/>
+    <text x="490" y="270" text-anchor="middle" font-size="13" font-weight="700" fill="#16273d">CLR (dotnet run)</text>
+    <text x="490" y="286" text-anchor="middle" font-size="11" fill="#5b6470">JIT turns IL into machine code</text>
+    <!-- marker for build-time errors -->
+    <line x1="350" y1="128" x2="378" y2="128" stroke="#2f6b3f" stroke-width="1.5" stroke-dasharray="4 3"/>
+    <text x="310" y="118" text-anchor="middle" font-size="11.5" font-weight="700" fill="#2f6b3f">Type errors</text>
+    <text x="310" y="133" text-anchor="middle" font-size="11.5" font-weight="700" fill="#2f6b3f">stop the</text>
+    <text x="310" y="148" text-anchor="middle" font-size="11.5" font-weight="700" fill="#2f6b3f">build here</text>
+  </svg>
+  <p class="caption">Figure 1. Python checks types while running; C# checks them before running.</p>
+
+  <h3 class="sub" id="s1-3">1.3&nbsp;&nbsp;.NET versus .NET Framework</h3>
+  <p>Two products share the name, and job descriptions mix them up.</p>
+  <ul class="tight">
+    <li><strong>.NET Framework</strong> (versions 1.0 to 4.8) is the original, Windows-only platform. It
+    receives security fixes but no new features. Many company codebases still run on it.</li>
+    <li><strong>.NET</strong> (formerly .NET Core; versions 5, 6, 7, 8, 9, 10) is the cross-platform
+    rewrite. It runs on Windows, Linux and macOS. All new work targets it. Even-numbered
+    versions are LTS (long-term support) releases.</li>
+  </ul>
+  <p>The companion project uses .NET 10, the LTS release from November 2025, with C# 14.
+  A codebase "on Framework" uses older syntax, such as explicit <code>Main</code>
+  methods and namespace blocks in braces. Section 3.2 shows both styles.</p>
+
+  <h3 class="sub" id="s1-4">1.4&nbsp;&nbsp;Python and C# Side by Side</h3>
+  <table class="data">
+    <thead><tr><th style="width:24%">Topic</th><th>Python</th><th>C#</th></tr></thead>
+    <tbody>
+      <tr><td>Typing</td><td>Dynamic; type hints are optional and not enforced</td><td>Static; every type checked at compile time</td></tr>
+      <tr><td>Blocks</td><td>Indentation</td><td><code>{ }</code> braces; statements end in <code>;</code></td></tr>
+      <tr><td>Code location</td><td>Functions may live anywhere in a module</td><td>Every method lives inside a class</td></tr>
+      <tr><td>Inheritance</td><td>Multiple base classes allowed</td><td>One base class, any number of interfaces</td></tr>
+      <tr><td>Privacy</td><td><code>_name</code> by convention only</td><td><code>private</code>, enforced by the compiler</td></tr>
+      <tr><td>Threads</td><td>Default CPython build has the GIL: one thread runs Python at a time</td><td>Threads run truly in parallel</td></tr>
+      <tr><td>Memory</td><td>Reference counting plus a cycle collector</td><td>Tracing garbage collector</td></tr>
+      <tr><td>Speed</td><td>Interpreted; slower for CPU work</td><td>JIT-compiled; usually much faster</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ===================== 2 ===================== -->
+<section class="new-page">
+  <h2 class="section" id="s2"><span class="snum">2</span> The Companion Project</h2>
+  <p>The companion project at <code>~/repo/c.tutorial</code> is a .NET solution with three projects.
+  A <strong>solution</strong> (<code>.slnx</code> file) is a list of projects that build together. A
+  <strong>project</strong> (<code>.csproj</code> file) compiles to one <code>.dll</code> or executable.
+  A Python monorepo with several packages, each with its own <code>pyproject.toml</code>, is the closest
+  match.</p>
+
+  <svg class="diagram" viewBox="0 0 620 200" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="'Nimbus Sans','Liberation Sans',sans-serif">
+    <defs>
+      <marker id="a2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1f3756"/></marker>
+    </defs>
+    <rect x="200" y="8" width="220" height="40" rx="6" fill="#f3f6f9" stroke="#46647f" stroke-width="1.5" stroke-dasharray="5 3"/>
+    <text x="310" y="27" text-anchor="middle" font-size="13" font-weight="700" font-family="'Liberation Mono',monospace" fill="#16273d">CSharpTutorial.slnx</text>
+    <text x="310" y="42" text-anchor="middle" font-size="10.5" fill="#5b6470">solution: lists the three projects</text>
+    <rect x="215" y="110" width="190" height="62" rx="7" fill="#eef3f9" stroke="#1f3756" stroke-width="2"/>
+    <text x="310" y="132" text-anchor="middle" font-size="13" font-weight="700" font-family="'Liberation Mono',monospace" fill="#16273d">Tutorial</text>
+    <text x="310" y="149" text-anchor="middle" font-size="11" fill="#5b6470">console app</text>
+    <text x="310" y="164" text-anchor="middle" font-size="11" fill="#5b6470">chapters + order code</text>
+    <rect x="12" y="110" width="160" height="62" rx="7" fill="#eef7f0" stroke="#2f6b3f" stroke-width="1.5"/>
+    <text x="92" y="132" text-anchor="middle" font-size="13" font-weight="700" font-family="'Liberation Mono',monospace" fill="#16273d">Tutorial.Api</text>
+    <text x="92" y="149" text-anchor="middle" font-size="11" fill="#5b6470">web API</text>
+    <text x="92" y="164" text-anchor="middle" font-size="11" fill="#5b6470">(ASP.NET Core)</text>
+    <rect x="448" y="110" width="160" height="62" rx="7" fill="#eef7f0" stroke="#2f6b3f" stroke-width="1.5"/>
+    <text x="528" y="132" text-anchor="middle" font-size="13" font-weight="700" font-family="'Liberation Mono',monospace" fill="#16273d">Tutorial.Tests</text>
+    <text x="528" y="149" text-anchor="middle" font-size="11" fill="#5b6470">unit tests</text>
+    <text x="528" y="164" text-anchor="middle" font-size="11" fill="#5b6470">(xUnit)</text>
+    <line x1="172" y1="141" x2="211" y2="141" stroke="#1f3756" stroke-width="1.5" marker-end="url(#a2)"/>
+    <line x1="448" y1="141" x2="409" y2="141" stroke="#1f3756" stroke-width="1.5" marker-end="url(#a2)"/>
+    <text x="192" y="190" text-anchor="middle" font-size="10.5" fill="#1f3756">references</text>
+    <text x="428" y="190" text-anchor="middle" font-size="10.5" fill="#1f3756">references</text>
+    <line x1="310" y1="48" x2="310" y2="106" stroke="#46647f" stroke-width="1" stroke-dasharray="3 3"/>
+    <line x1="250" y1="48" x2="92" y2="106" stroke="#46647f" stroke-width="1" stroke-dasharray="3 3"/>
+    <line x1="370" y1="48" x2="528" y2="106" stroke="#46647f" stroke-width="1" stroke-dasharray="3 3"/>
+  </svg>
+  <p class="caption">Figure 2. The solution. The API and the tests both use the order code inside <code>Tutorial</code>.</p>
+
+  <h3 class="sub" id="s2-1">2.1&nbsp;&nbsp;Files</h3>
+  <table class="data">
+    <thead><tr><th style="width:42%">Path</th><th>Contents</th></tr></thead>
+    <tbody>
+      <tr><td class="c">src/Tutorial/Program.cs</td><td>Entry point. Runs one chapter or all of them.</td></tr>
+      <tr><td class="c">src/Tutorial/Ch03Basics.cs &hellip; Ch12Async.cs</td><td>One file per book chapter. The number in the file name is the chapter number.</td></tr>
+      <tr><td class="c">src/Tutorial/Orders/</td><td>The order system: products, orders, discounts, checkout.</td></tr>
+      <tr><td class="c">src/Tutorial/Ch13Orders.cs</td><td>Runs the order system end to end.</td></tr>
+      <tr><td class="c">src/Tutorial.Api/Program.cs</td><td>A web API that sells products through the order system.</td></tr>
+      <tr><td class="c">tests/Tutorial.Tests/</td><td>Unit tests for <code>BankAccount</code> and <code>OrderService</code>.</td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="sub" id="s2-2">2.2&nbsp;&nbsp;The dotnet Command</h3>
+  <p>One command, <code>dotnet</code>, replaces the separate Python tools. Run these from the repo root.
+  The SDK is installed at <code>~/.dotnet</code>; if <code>dotnet</code> is not found, run
+  <code>export PATH=$HOME/.dotnet:$PATH</code> first.</p>
+  <table class="data">
+    <thead><tr><th style="width:30%">Task</th><th>Python</th><th>.NET</th></tr></thead>
+    <tbody>
+      <tr><td>Run all chapters</td><td class="c">python main.py</td><td class="c">dotnet run --project src/Tutorial</td></tr>
+      <tr><td>Run chapter 6</td><td class="c">python main.py 6</td><td class="c">dotnet run --project src/Tutorial -- 6</td></tr>
+      <tr><td>Compile only</td><td>(none)</td><td class="c">dotnet build</td></tr>
+      <tr><td>Run tests</td><td class="c">pytest</td><td class="c">dotnet test</td></tr>
+      <tr><td>Add a package</td><td class="c">uv add requests</td><td class="c">dotnet add package Serilog</td></tr>
+      <tr><td>New project</td><td class="c">uv init</td><td class="c">dotnet new console -o MyApp</td></tr>
+      <tr><td>Format code</td><td class="c">ruff format</td><td class="c">dotnet format</td></tr>
+      <tr><td>Virtual env</td><td class="c">.venv</td><td>None needed. Packages are per project.</td></tr>
+    </tbody>
+  </table>
+  <p>The demo numbers match this book's chapter numbers: <code>-- 6</code> runs the code for chapter 6,
+  and the valid numbers are 3 to 13. The <code>--</code> separates <code>dotnet</code>'s own options
+  from the arguments passed to your program.</p>
+
+  <h3 class="sub" id="s2-3">2.3&nbsp;&nbsp;The Project File</h3>
+  <p>The <code>.csproj</code> file is an XML file that lists the project's build settings and
+  package dependencies. It is the counterpart of <code>pyproject.toml</code>.</p>
+:::cs Tutorial/Tutorial.csproj
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>Tutorial</RootNamespace>
+  </PropertyGroup>
+</Project>
+:::
+  <ul class="tight">
+    <li><code>OutputType Exe</code>: build a runnable program, not a library.</li>
+    <li><code>TargetFramework net10.0</code>: the .NET version (Python: <code>requires-python</code>).</li>
+    <li><code>ImplicitUsings</code>: imports common namespaces such as <code>System</code> and
+    <code>System.Linq</code> into every file automatically.</li>
+    <li><code>Nullable</code>: makes the compiler warn when code might use a <code>null</code> value
+    (section 4.5).</li>
+  </ul>
+  <p>A test project adds <code>&lt;PackageReference&gt;</code> lines for xUnit, the same way
+  <code>pyproject.toml</code> lists dependencies.</p>
+
+  <h3 class="sub" id="s2-4">2.4&nbsp;&nbsp;Program.cs Walkthrough</h3>
+  <p><code>Program.cs</code> reads the command line and calls each chapter's <code>Run</code>
+  method. It uses syntax from later chapters (<code>foreach</code>, <code>switch</code>, the
+  <code>? :</code> conditional, LINQ's <code>Select</code>); skim it now and return to it after chapter 10. It uses <strong>top-level statements</strong>: code written directly in the file,
+  with no class around it. The compiler wraps it in a hidden class and <code>Main</code>
+  method. Only one file per project may do this.</p>
+:::cs Tutorial/Program.cs (abridged)
+using Tutorial;
+
+var titles = new Dictionary<int, string>
+{
+    [1] = "Hello, C#",
+    [2] = "Types and variables",
+    // ... chapters 3 to 11 ...
+};
+
+// args is the command-line arguments, like Python's sys.argv[1:]
+IEnumerable<int> toRun = args.Length > 0 ? args.Select(int.Parse) : titles.Keys;
+
+foreach (int chapter in toRun)
+{
+    Console.WriteLine($"\n=== Chapter {chapter}: {titles[chapter]} ===");
+    switch (chapter)
+    {
+        case 1: Ch03Basics.Run(); break;
+        // ...
+        case 10: await Ch12Async.RunAsync(); break;
+        case 11: Ch13Orders.Run(); break;
+    }
+}
+:::
+  <ul class="tight">
+    <li><code>using Tutorial;</code> imports the <code>Tutorial</code> namespace, where the chapter classes live.
+    It is Python's <code>from tutorial import *</code>, limited to type names.</li>
+    <li><code>args.Select(int.Parse)</code> converts each argument string to an <code>int</code>
+    (Python: <code>map(int, sys.argv[1:])</code>). Chapter 10 covers <code>Select</code>.</li>
+    <li><code>titles.Keys</code> runs every chapter when no argument is given.</li>
+    <li>C# does not let one <code>case</code> fall through into the next, so each one ends in
+    <code>break</code> (or <code>return</code> or <code>throw</code>).</li>
+  </ul>
+</section>
+
+<!-- ===================== 3 ===================== -->
+<section class="new-page">
+  <h2 class="section" id="s3"><span class="snum">3</span> Syntax Basics</h2>
+  <p>C# uses C-style syntax. Braces mark blocks, semicolons end statements, and
+  names are case-sensitive. Indentation is ignored by the compiler but kept by convention.
+  Run this chapter with <code>dotnet run --project src/Tutorial -- 3</code>.</p>
+
+  <h3 class="sub" id="s3-1">3.1&nbsp;&nbsp;A First Program</h3>
+:::file src/Tutorial/Ch03Basics.cs :: namespace Tutorial; :: public static class Ch03Basics
+  <p>The same program in Python:</p>
+:::py
+import math
+
+def run():
+    print("Hello, C#!")
+    name = "Ada"
+    year = 1843
+    print(f"{name} wrote the first program in {year}.")
+    print(f"pi to 2 places: {math.pi:.2f}")
+    if year < 1900:
+        print("That was a long time ago.")
+:::
+  <ul class="tight">
+    <li><code>namespace Tutorial;</code> puts everything in the file into the
+    <code>Tutorial</code> namespace. A namespace is a dotted name, such as <code>Tutorial.Orders</code>, that becomes part of the full name of every type declared in it, like a Python package path.</li>
+    <li><code>public static class</code> is a class that holds only static methods and fields and cannot be
+    instantiated. It is the closest thing C# has to a Python module of plain functions.</li>
+    <li><code>public static void Run()</code> declares a method. <code>void</code> means it returns nothing
+    (Python: <code>-&gt; None</code>).</li>
+    <li><code>string name = "Ada";</code> declares the variable's type before its name.</li>
+    <li><code>$"...{name}..."</code> is an interpolated string, the C# version of an f-string.</li>
+    <li>Strings use double quotes only. Single quotes hold one character: <code>'A'</code> is a <code>char</code>.</li>
+  </ul>
+
+  <h3 class="sub" id="s3-2">3.2&nbsp;&nbsp;The Older Style</h3>
+  <p>Code written before 2021, and all .NET Framework code, spells out a namespace block,
+  a class and a <code>Main</code> method, all of which modern C# lets you leave out. The program below is the same "hello" in that style.</p>
+:::cs
+using System;
+
+namespace Tutorial
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            Console.WriteLine("Hello, C#!");
+        }
+    }
+}
+:::
+  <p><code>static void Main(string[] args)</code> is the entry point: the method the runtime calls first.
+  It plays the role of Python's <code>if __name__ == "__main__":</code> block. The namespace wraps the
+  class in braces instead of ending in a semicolon. Both styles compile to the same program.</p>
+
+  <h3 class="sub" id="s3-3">3.3&nbsp;&nbsp;Naming Conventions</h3>
+  <p>C# naming differs from PEP 8, and interviewers notice. Methods and properties use
+  PascalCase, where Python uses snake_case.</p>
+  <table class="data">
+    <thead><tr><th style="width:34%">Kind of name</th><th>C# style</th><th>Python style</th></tr></thead>
+    <tbody>
+      <tr><td>Class, record, struct</td><td class="c">BankAccount</td><td class="c">BankAccount</td></tr>
+      <tr><td>Method</td><td class="c">Deposit(), TryParse()</td><td class="c">deposit(), try_parse()</td></tr>
+      <tr><td>Property, public field</td><td class="c">Balance, Owner</td><td class="c">balance, owner</td></tr>
+      <tr><td>Local variable, parameter</td><td class="c">openingBalance</td><td class="c">opening_balance</td></tr>
+      <tr><td>Private field</td><td class="c">_balance</td><td class="c">_balance</td></tr>
+      <tr><td>Interface</td><td class="c">IShape (I prefix)</td><td class="c">Shape (Protocol)</td></tr>
+      <tr><td>Constant</td><td class="c">TaxRate</td><td class="c">TAX_RATE</td></tr>
+      <tr><td>Async method</td><td class="c">FetchAsync()</td><td class="c">fetch()</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ===================== 4 ===================== -->
+<section class="new-page">
+  <h2 class="section" id="s4"><span class="snum">4</span> Types and Variables</h2>
+  <p>Every C# variable has one type for its whole life, and the compiler rejects
+  any assignment that does not fit. In Python, <code>x = 3</code> followed by <code>x = "three"</code>
+  is legal. In C#, <code>int x = 3;</code> followed by <code>x = "three";</code> does not compile.
+  File: <code>src/Tutorial/Ch04Types.cs</code>.</p>
+
+  <h3 class="sub" id="s4-1">4.1&nbsp;&nbsp;Built-in Types</h3>
+  <table class="data">
+    <thead><tr><th style="width:18%">C# type</th><th>Holds</th><th style="width:26%">Python closest</th></tr></thead>
+    <tbody>
+      <tr><td class="c">int</td><td>Whole number, 32-bit, about &plusmn;2.1 billion. Wraps around silently on overflow.</td><td class="c">int (unbounded)</td></tr>
+      <tr><td class="c">long</td><td>Whole number, 64-bit. Literal suffix <code>L</code>.</td><td class="c">int</td></tr>
+      <tr><td class="c">double</td><td>64-bit binary floating point.</td><td class="c">float</td></tr>
+      <tr><td class="c">decimal</td><td>128-bit base-10 number. Exact for money. Literal suffix <code>m</code>.</td><td class="c">decimal.Decimal</td></tr>
+      <tr><td class="c">bool</td><td><code>true</code> or <code>false</code>, lower case.</td><td class="c">bool</td></tr>
+      <tr><td class="c">char</td><td>One character, in single quotes.</td><td>(a 1-char str)</td></tr>
+      <tr><td class="c">string</td><td>Immutable text, in double quotes.</td><td class="c">str</td></tr>
+      <tr><td class="c">object</td><td>Any value at all. Every type derives from it.</td><td class="c">object</td></tr>
+    </tbody>
+  </table>
+:::file src/Tutorial/Ch04Types.cs :: int count = 3; ..> Console.WriteLine($"{count}
+:::out
+double: 0.30000000000000004   decimal: 0.3
+:::
+  <p>Use <code>decimal</code> for money, as the order system in chapter 13 does. A <code>double</code>
+  cannot store 0.1 exactly, so sums of prices drift by tiny amounts.</p>
+
+  <h3 class="sub" id="s4-2">4.2&nbsp;&nbsp;var</h3>
+  <p><code>var</code> tells the compiler to work out the type from the right-hand side. The variable
+  is still statically typed. <code>var</code> saves typing; it does not make the variable dynamic.</p>
+:::file src/Tutorial/Ch04Types.cs :: var total ..> Console.WriteLine($"total is
+:::out
+total is an Int32
+:::
+  <p><code>Int32</code> is the .NET name for <code>int</code>; <code>int</code> is the C# keyword for it.
+  Most teams use <code>var</code> when the type is obvious from the line, such as
+  <code>var names = new List&lt;string&gt;();</code>.</p>
+
+  <h3 class="sub" id="s4-3">4.3&nbsp;&nbsp;Conversions</h3>
+  <p>C# converts between number types automatically only when the conversion is considered safe,
+  such as <code>int</code> to <code>long</code> or <code>int</code> to <code>double</code>. A conversion
+  that can lose information, such as <code>double</code> to <code>int</code>, must be written out.</p>
+:::file src/Tutorial/Ch04Types.cs :: int parsed ..> Console.WriteLine($"{parsed}
+:::out
+42 False 0 3 3
+:::
+  <ul class="tight">
+    <li><code>int.Parse("42")</code> is Python's <code>int("42")</code>. It throws an exception on bad input.</li>
+    <li><code>int.TryParse(text, out int maybe)</code> returns <code>true</code> or <code>false</code>
+    instead of throwing, and writes the number into <code>maybe</code>. This <code>TryX</code> pattern
+    appears all over .NET. Section 7.3 explains <code>out</code>.</li>
+    <li><code>(int)3.99</code> is a <strong>cast</strong>: an explicit conversion. It truncates to 3.</li>
+    <li><code>7 / 2</code> is 3, because both sides are <code>int</code>. Python's <code>/</code> would give 3.5.</li>
+  </ul>
+
+  <h3 class="sub" id="s4-4">4.4&nbsp;&nbsp;Value Types and Reference Types</h3>
+  <p>Every C# type is either a value type or a reference type, and the two behave differently
+  on assignment. This is the single most common C# interview question.</p>
+  <ul class="tight">
+    <li>A <strong>value type</strong> variable holds the data itself. Assigning it copies the data.
+    Value types: all number types, <code>bool</code>, <code>char</code>, <code>struct</code>, <code>enum</code>.</li>
+    <li>A <strong>reference type</strong> variable holds the address of an object. Assigning it copies
+    the address, so both variables point at one object. Reference types: <code>class</code>,
+    <code>record</code>, <code>string</code>, arrays, <code>List</code>, interfaces.</li>
+  </ul>
+  <p>Python has only the second kind: every Python variable is a reference.</p>
+:::file src/Tutorial/Ch04Types.cs :: int a = 1; ..> Console.WriteLine($"listA.Count
+:::out
+a = 1, b = 99
+listA.Count = 3
+:::
+
+  <svg class="diagram" viewBox="0 0 620 196" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="'Nimbus Sans','Liberation Sans',sans-serif">
+    <defs>
+      <marker id="a3" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1f3756"/></marker>
+    </defs>
+    <text x="140" y="20" text-anchor="middle" font-size="13.5" font-weight="700" fill="#16273d">Value type (int)</text>
+    <text x="440" y="20" text-anchor="middle" font-size="13.5" font-weight="700" fill="#16273d">Reference type (List&lt;int&gt;)</text>
+    <line x1="290" y1="8" x2="290" y2="190" stroke="#c4d4e6" stroke-width="1"/>
+    <!-- value side -->
+    <text x="40" y="70" font-size="13" font-family="'Liberation Mono',monospace" fill="#16273d">a</text>
+    <rect x="70" y="48" width="120" height="34" rx="4" fill="#eef3f9" stroke="#1f3756" stroke-width="1.5"/>
+    <text x="130" y="70" text-anchor="middle" font-size="14" font-weight="700" font-family="'Liberation Mono',monospace" fill="#16273d">1</text>
+    <text x="40" y="132" font-size="13" font-family="'Liberation Mono',monospace" fill="#16273d">b</text>
+    <rect x="70" y="110" width="120" height="34" rx="4" fill="#eef3f9" stroke="#1f3756" stroke-width="1.5"/>
+    <text x="130" y="132" text-anchor="middle" font-size="14" font-weight="700" font-family="'Liberation Mono',monospace" fill="#16273d">99</text>
+    <text x="140" y="174" text-anchor="middle" font-size="11.5" fill="#5b6470">two separate copies of the data</text>
+    <!-- reference side -->
+    <text x="312" y="70" font-size="13" font-family="'Liberation Mono',monospace" fill="#16273d">listA</text>
+    <rect x="360" y="52" width="34" height="26" rx="4" fill="#eef3f9" stroke="#1f3756" stroke-width="1.5"/>
+    <circle cx="377" cy="65" r="4" fill="#1f3756"/>
+    <text x="312" y="132" font-size="13" font-family="'Liberation Mono',monospace" fill="#16273d">listB</text>
+    <rect x="360" y="114" width="34" height="26" rx="4" fill="#eef3f9" stroke="#1f3756" stroke-width="1.5"/>
+    <circle cx="377" cy="127" r="4" fill="#1f3756"/>
+    <rect x="470" y="74" width="132" height="46" rx="6" fill="#eef7f0" stroke="#2f6b3f" stroke-width="1.5"/>
+    <text x="536" y="94" text-anchor="middle" font-size="11" fill="#5b6470">one List object</text>
+    <text x="536" y="111" text-anchor="middle" font-size="13.5" font-weight="700" font-family="'Liberation Mono',monospace" fill="#16273d">[1, 2, 3]</text>
+    <line x1="381" y1="65" x2="466" y2="88" stroke="#1f3756" stroke-width="1.5" marker-end="url(#a3)"/>
+    <line x1="381" y1="127" x2="466" y2="106" stroke="#1f3756" stroke-width="1.5" marker-end="url(#a3)"/>
+    <text x="456" y="174" text-anchor="middle" font-size="11.5" fill="#5b6470">two variables, one shared object</text>
+  </svg>
+  <p class="caption">Figure 3. Assigning a value type copies the data; assigning a reference type copies only the address, so both variables point at one object.</p>
+
+  <h3 class="sub" id="s4-5">4.5&nbsp;&nbsp;null</h3>
+  <p><code>null</code> means "no object", like Python's <code>None</code>. A type name followed by
+  <code>?</code> marks a variable that is allowed to hold <code>null</code>.</p>
+:::file src/Tutorial/Ch04Types.cs :: int? missing ..> Console.WriteLine(maybeName
+:::out
+-1
+0
+:::
+  <ul class="tight">
+    <li><code>int?</code> is an <code>int</code> that may also be <code>null</code> (Python: <code>Optional[int]</code>).</li>
+    <li><code>int?</code> and <code>string?</code> look alike but work differently. <code>int?</code> is a
+    separate type, <code>Nullable&lt;int&gt;</code>, with <code>.HasValue</code> and <code>.Value</code>.
+    <code>string?</code> is only a note to the compiler: at run time any <code>string</code> variable can hold
+    <code>null</code>, and the <code>?</code> controls which warnings you get.</li>
+    <li><code>x ?? y</code> gives <code>x</code>, or <code>y</code> if <code>x</code> is null.
+    Python's <code>x if x is not None else y</code>.</li>
+    <li><code>x?.Length</code> gives <code>null</code> instead of crashing when <code>x</code> is null.</li>
+    <li>With <code>&lt;Nullable&gt;enable&lt;/Nullable&gt;</code> in the project file, the compiler warns
+    when a <code>string</code> without <code>?</code> might receive <code>null</code>. These are
+    <strong>nullable reference types</strong>. They are warnings, not errors.</li>
+    <li>Using a null reference throws <code>NullReferenceException</code>, the C# version of
+    <code>AttributeError: 'NoneType' object has no attribute ...</code>.</li>
+  </ul>
+</section>
+
+<!-- ===================== 5 ===================== -->
+<section class="new-page">
+  <h2 class="section" id="s5"><span class="snum">5</span> Control Flow</h2>
+  <p>Branches and loops work as in Python, written with parentheses and braces.
+  File: <code>src/Tutorial/Ch05ControlFlow.cs</code>.</p>
+
+  <h3 class="sub" id="s5-1">5.1&nbsp;&nbsp;Branches</h3>
+:::file src/Tutorial/Ch05ControlFlow.cs :: int score = 83; ..> Console.WriteLine($"grade
+  <ul class="tight">
+    <li>The condition of an <code>if</code> must be in parentheses and must be a <code>bool</code>.
+    C# has no "truthiness": <code>if (count)</code> does not compile. Write <code>if (count &gt; 0)</code>.</li>
+    <li><code>&amp;&amp;</code>, <code>||</code> and <code>!</code> are Python's <code>and</code>, <code>or</code> and <code>not</code>.</li>
+    <li><code>cond ? a : b</code> is Python's <code>a if cond else b</code>.</li>
+    <li>A <strong>switch expression</strong> picks a value by testing the input against patterns in order.
+    <code>_</code> matches anything. It resembles Python's <code>match</code> statement, but it returns a value.</li>
+  </ul>
+
+  <h3 class="sub" id="s5-2">5.2&nbsp;&nbsp;Loops</h3>
+:::file src/Tutorial/Ch05ControlFlow.cs :: for (int i = 0 ..> Console.WriteLine($"n = 
+  <table class="data">
+    <thead><tr><th>Python</th><th>C#</th></tr></thead>
+    <tbody>
+      <tr><td class="c">for i in range(3):</td><td class="c">for (int i = 0; i &lt; 3; i++)</td></tr>
+      <tr><td class="c">for fruit in fruits:</td><td class="c">foreach (string fruit in fruits)</td></tr>
+      <tr><td class="c">for i, f in enumerate(fruits):</td><td class="c">for (int i = 0; i &lt; fruits.Length; i++) then fruits[i]</td></tr>
+      <tr><td class="c">while n &lt; 3:</td><td class="c">while (n &lt; 3)</td></tr>
+      <tr><td class="c">n += 1</td><td class="c">n++; or n += 1;</td></tr>
+    </tbody>
+  </table>
+  <p>The <code>for</code> header has three parts separated by semicolons: the starting statement, the
+  condition checked before each pass, and the step run after each pass. <code>break</code> and
+  <code>continue</code> work as in Python.</p>
+</section>
+
+<!-- ===================== 6 ===================== -->
+<section class="new-page">
+  <h2 class="section" id="s6"><span class="snum">6</span> Collections and Generics</h2>
+  <p>Every C# collection holds one declared element type. A <code>List&lt;string&gt;</code>
+  holds only strings, and adding an <code>int</code> is a compile error.
+  File: <code>src/Tutorial/Ch06Collections.cs</code>.</p>
+
+  <h3 class="sub" id="s6-1">6.1&nbsp;&nbsp;Python to C# Mapping</h3>
+  <table class="data">
+    <thead><tr><th style="width:24%">Python</th><th style="width:36%">C#</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td class="c">list</td><td class="c">List&lt;T&gt;</td><td>Growable. <code>.Add</code>, <code>.Remove</code>, <code>.Count</code>.</td></tr>
+      <tr><td class="c">list (fixed)</td><td class="c">T[]</td><td>Array. Fixed length. <code>.Length</code>.</td></tr>
+      <tr><td class="c">dict</td><td class="c">Dictionary&lt;K, V&gt;</td><td>Missing key throws <code>KeyNotFoundException</code>.</td></tr>
+      <tr><td class="c">set</td><td class="c">HashSet&lt;T&gt;</td><td><code>.Add</code> returns false if already present.</td></tr>
+      <tr><td class="c">tuple</td><td class="c">(string, int)</td><td>Parts can be named: <code>(string City, int Pop)</code>.</td></tr>
+      <tr><td class="c">collections.deque</td><td class="c">Queue&lt;T&gt;, Stack&lt;T&gt;</td><td>FIFO and LIFO.</td></tr>
+      <tr><td class="c">Iterable</td><td class="c">IEnumerable&lt;T&gt;</td><td>Anything <code>foreach</code> can loop over.</td></tr>
+    </tbody>
+  </table>
+  <p>The count is <code>.Count</code> on lists and dictionaries, but <code>.Length</code> on arrays and
+  strings. There is no single <code>len()</code>.</p>
+
+  <h3 class="sub" id="s6-2">6.2&nbsp;&nbsp;Walkthrough</h3>
+:::file src/Tutorial/Ch06Collections.cs :: int[] scores ..> Console.WriteLine($"{names.Count}
+  <p>Indexing from the end uses <code>^1</code>, not <code>-1</code>. Slicing uses <code>..</code>
+  in place of <code>:</code>. A negative index throws <code>IndexOutOfRangeException</code>.</p>
+:::file src/Tutorial/Ch06Collections.cs :: var ages = new ..> Console.WriteLine($"{person}
+  <ul class="tight">
+    <li>The braces after <code>new Dictionary&lt;string, int&gt;</code> are a <strong>collection initializer</strong>:
+    starting contents, like a dict literal.</li>
+    <li><code>TryGetValue</code> is the safe lookup. It returns <code>false</code> when the key is absent,
+    where Python's <code>.get()</code> returns <code>None</code>.</li>
+    <li><code>foreach (var (person, age) in ages)</code> unpacks each key-value pair, like
+    <code>for person, age in ages.items()</code>.</li>
+  </ul>
+
+  <h3 class="sub" id="s6-3">6.3&nbsp;&nbsp;Generics</h3>
+  <p>A <strong>generic type</strong> is a type with a placeholder for another type, written in angle brackets.
+  <code>List&lt;T&gt;</code> is written once; <code>List&lt;string&gt;</code> and <code>List&lt;int&gt;</code>
+  are two concrete types made from it. Python's <code>list[str]</code> hint looks the same but is
+  never enforced. C# enforces it at compile time, and the type argument still exists at run time.</p>
+  <p>You can write your own generic methods and classes. <code>&lt;T&gt;</code> after the method name
+  declares the placeholder, and the caller's argument types fill it in:</p>
+:::cs
+public static T FirstItem<T>(List<T> items)
+{
+    return items[0];
+}
+
+string name = FirstItem(new List<string> { "Ada", "Grace" });   // T is string
+int score = FirstItem(new List<int> { 90, 72 });                // T is int
+:::
+  <p>A <code>where</code> clause limits what <code>T</code> may be. For example,
+  <code>where T : IShape</code> accepts only types that implement the <code>IShape</code> interface (chapter 9).</p>
+</section>
+
+<!-- ===================== 7 ===================== -->
+<section class="new-page">
+  <h2 class="section" id="s7"><span class="snum">7</span> Methods</h2>
+  <p>A method is a function that belongs to a class. C# has no free-standing functions;
+  even utility functions live in a <code>static class</code>. File: <code>src/Tutorial/Ch07Methods.cs</code>.</p>
+
+  <h3 class="sub" id="s7-1">7.1&nbsp;&nbsp;Anatomy of a Signature</h3>
+:::file src/Tutorial/Ch07Methods.cs :: public static int Add(int a, int b)
+  <p>Read the first line left to right:</p>
+  <ul class="tight">
+    <li><code>public</code>: who may call it (section 7.2).</li>
+    <li><code>static</code>: it belongs to the class, not to an object. Call it as <code>Ch07Methods.Add(2, 3)</code>.</li>
+    <li><code>int</code>: the return type. Every return path must return an <code>int</code>.</li>
+    <li><code>Add</code>: the name, in PascalCase.</li>
+    <li><code>(int a, int b)</code>: each parameter with its type.</li>
+  </ul>
+  <p>Python equivalent: <code>def add(a: int, b: int) -&gt; int:</code>, except C# enforces the types.</p>
+  <p>A method with a single expression can use <code>=&gt;</code> instead of braces and <code>return</code>:</p>
+:::file src/Tutorial/Ch07Methods.cs :: public static int Square
+  <p><strong>Overloading</strong> means two methods share a name and differ in parameter types. The compiler
+  picks one from the argument types. Python has no overloading; it would use one function that checks types.</p>
+:::file src/Tutorial/Ch07Methods.cs :: public static double Add
+
+  <h3 class="sub" id="s7-2">7.2&nbsp;&nbsp;Access Modifiers and static</h3>
+  <p>An access modifier states which code may use a class member. The compiler enforces it.</p>
+  <table class="data">
+    <thead><tr><th style="width:22%">Modifier</th><th>Who can use the member</th></tr></thead>
+    <tbody>
+      <tr><td class="c">public</td><td>Any code.</td></tr>
+      <tr><td class="c">private</td><td>Only code inside the same class. The default for class members.</td></tr>
+      <tr><td class="c">protected</td><td>The same class and its subclasses.</td></tr>
+      <tr><td class="c">internal</td><td>Any code in the same project (assembly). The default for classes.</td></tr>
+    </tbody>
+  </table>
+  <p><code>static</code> is not an access modifier. A <code>static</code> member belongs to the class itself:
+  one copy shared by all objects, used without creating an object. A non-static (instance) member belongs to
+  each object. In Python terms, <code>static</code> methods are <code>@staticmethod</code>, and static fields are
+  class attributes.</p>
+
+  <h3 class="sub" id="s7-3">7.3&nbsp;&nbsp;Parameters</h3>
+:::file src/Tutorial/Ch07Methods.cs :: public static string Greet ..> public static void Double
+  <p>The calls, from <code>Run</code>:</p>
+:::file src/Tutorial/Ch07Methods.cs :: Console.WriteLine(Greet("Ada"));  ..> Console.WriteLine($"value is now
+  <ul class="tight">
+    <li><strong>Default values</strong> work as in Python: <code>string greeting = "Hello"</code>.</li>
+    <li><strong>Named arguments</strong> use a colon: <code>Greet("Ada", greeting: "Welcome")</code>.</li>
+    <li><strong><code>out</code></strong> marks a parameter the method must fill in. The caller writes
+    <code>out int quotient</code> and gets the value back. It exists because C# methods historically
+    returned only one value.</li>
+    <li><strong>Tuples</strong> are the modern way to return several values, as in Python.
+    <code>var (lo, hi) = MinMax(...)</code> unpacks them.</li>
+    <li><strong><code>params</code></strong> accepts any number of arguments as an array, like <code>*args</code>.</li>
+    <li><strong><code>ref</code></strong> passes the caller's variable itself, so the method can change it.
+    Python has no equivalent.</li>
+  </ul>
+
+  <h3 class="sub" id="s7-4">7.4&nbsp;&nbsp;Lambdas, Func and Action</h3>
+  <p>A lambda is an unnamed function written <code>parameters =&gt; expression</code>. Python writes
+  <code>lambda x: x * 3</code>; C# writes <code>x =&gt; x * 3</code>. A C# lambda may also have a
+  braced body with several statements, which Python lambdas cannot.</p>
+:::file src/Tutorial/Ch07Methods.cs :: Func<int, int> triple ..> shout("done")
+  <p>A variable that holds a function has a <strong>delegate</strong> type: a type that states the
+  function's parameter types and return type. <code>Func&lt;int, int&gt;</code> takes an
+  <code>int</code> and returns an <code>int</code>; the last type argument is always the return type.
+  <code>Action&lt;string&gt;</code> takes a <code>string</code> and returns nothing.</p>
+</section>
+
+<!-- ===================== 8 ===================== -->
+<section class="new-page">
+  <h2 class="section" id="s8"><span class="snum">8</span> Classes, Records and Structs</h2>
+  <p>C# offers three ways to define your own type. A <code>class</code> is the default. A
+  <code>record</code> is for data compared by value. A <code>struct</code> is a small value type.
+  File: <code>src/Tutorial/Ch08Classes.cs</code>.</p>
+
+  <h3 class="sub" id="s8-1">8.1&nbsp;&nbsp;A Class: BankAccount</h3>
+  <p><code>BankAccount</code> shows <strong>encapsulation</strong>, which means a class keeps its data private
+  and lets outside code change it only through methods that check each change. Outside code can read the
+  balance but can change it only through <code>Deposit</code> and <code>Withdraw</code>.</p>
+:::file src/Tutorial/Ch08Classes.cs :: public class BankAccount
+  <p>The same class in Python, for comparison:</p>
+:::py
+class BankAccount:
+    _next_id = 1                      # class attribute
+
+    def __init__(self, owner: str, opening_balance=Decimal("0")):
+        if not owner or not owner.strip():
+            raise ValueError("Owner is required.")
+        self.owner = owner
+        self.id = f"ACC-{BankAccount._next_id:04d}"
+        BankAccount._next_id += 1
+        self._balance = opening_balance
+
+    @property
+    def balance(self) -> Decimal:
+        return self._balance
+
+    def deposit(self, amount: Decimal) -> None:
+        if amount <= 0:
+            raise ValueError("Deposit must be positive.")
+        self._balance += amount
+
+    def __str__(self) -> str:
+        return f"{self.id} {self.owner}: {self.balance:.2f}"
+:::
+
+  <h3 class="sub" id="s8-2">8.2&nbsp;&nbsp;Reading the Class</h3>
+  <ul class="tight">
+    <li><strong>Field</strong>: a variable stored in each object. <code>private decimal _balance;</code>
+    Fields are normally private.</li>
+    <li><strong>Property</strong>: a member that looks like a field from outside but runs code on read or
+    write. <code>public string Owner { get; }</code> can be read by anyone and set only in the constructor.
+    <code>public decimal Balance =&gt; _balance;</code> is computed on each read, like <code>@property</code>.
+    Public data in C# is exposed through properties, not public fields.</li>
+    <li><strong>Constructor</strong>: the method with the class's name and no return type. It is
+    <code>__init__</code>. There is no <code>self</code> parameter; members are in scope directly, and
+    <code>this</code> refers to the current object when you need it.</li>
+    <li><strong><code>nameof(owner)</code></strong> produces the string <code>"owner"</code>. If the
+    parameter is renamed and <code>nameof</code> is not, the build fails, so the text cannot go out of date.</li>
+    <li><strong><code>override string ToString()</code></strong> replaces the default text form, as
+    <code>__str__</code> does. <code>Console.WriteLine(account)</code> calls it.</li>
+  </ul>
+  <p>Property forms you will meet in real code:</p>
+:::cs
+public string Name { get; set; }          // anyone reads and writes
+public string Name { get; private set; }  // anyone reads; only this class writes
+public string Name { get; }               // set only in the constructor
+public string Name { get; init; }         // set in constructor or object initializer
+public string Name => _name;              // computed on every read
+:::
+
+  <h3 class="sub" id="s8-3">8.3&nbsp;&nbsp;Using It</h3>
+:::file src/Tutorial/Ch08Classes.cs :: var account = new BankAccount ..> Console.WriteLine($"Refused
+:::out
+ACC-0001 Ada: 120.00
+Refused: Insufficient funds: balance 120, requested 500.
+:::
+  <p><code>new BankAccount(...)</code> creates an object; Python omits the word <code>new</code>.
+  The commented-out line assigns to <code>Balance</code>. It fails to compile because the property has
+  no setter.</p>
+
+  <h3 class="sub" id="s8-4">8.4&nbsp;&nbsp;Records</h3>
+  <p>A <strong>record</strong> is a class designed to hold data, with value equality: two records are equal
+  when all their properties are equal. One line declares the properties, the constructor, equality and a
+  readable <code>ToString</code>. It matches Python's <code>@dataclass(frozen=True)</code>.</p>
+:::file src/Tutorial/Ch08Classes.cs :: public record Point(int X, int Y); :: var p1 ..> Console.WriteLine(g1 == g2)
+:::out
+True
+Point { X = 1, Y = 2 }
+Point { X = 10, Y = 2 }
+False
+:::
+  <p><code>p1 == p2</code> is <code>True</code> because records compare contents. <code>g1 == g2</code> is
+  <code>False</code> because classes compare identity: two separate objects are never equal unless the class
+  overrides equality. Python's <code>==</code> on plain classes also compares identity.</p>
+  <p><code>with</code> makes a copy with some properties changed, like <code>dataclasses.replace</code>.</p>
+
+  <h3 class="sub" id="s8-5">8.5&nbsp;&nbsp;Structs</h3>
+  <p>A <strong>struct</strong> is a value type you define yourself (section 4.4). Assigning one copies all of
+  its data. Structs suit small values such as coordinates or temperatures.</p>
+  <p><code>new Temperature { Celsius = 20 }</code> is an <strong>object initializer</strong>: it creates the
+  object, then sets each listed property. It works for classes too.</p>
+:::file src/Tutorial/Ch08Classes.cs :: public struct Temperature :: var t1 ..> Console.WriteLine($"t1
+:::out
+t1 20C = 68F; t2 100C
+:::
+
+  <h3 class="sub" id="s8-6">8.6&nbsp;&nbsp;Choosing Between Them</h3>
+  <table class="data">
+    <thead><tr><th style="width:16%"></th><th>class</th><th>record</th><th>struct</th></tr></thead>
+    <tbody>
+      <tr><td>Kind</td><td>Reference</td><td>Reference</td><td>Value</td></tr>
+      <tr><td>== compares</td><td>Identity</td><td>Contents</td><td>Not defined unless you write it; <code>Equals</code> compares contents</td></tr>
+      <tr><td>Typical use</td><td>Objects with behaviour and changing state</td><td>Data passed around: DTOs, results, messages</td><td>Small values, a few fields</td></tr>
+      <tr><td>Example here</td><td><code>BankAccount</code>, <code>Order</code></td><td><code>Product</code>, <code>Receipt</code></td><td><code>Temperature</code></td></tr>
+    </tbody>
+  </table>
+  <p>A <strong>DTO</strong> (data transfer object) is a type that only holds data moving between parts of
+  a program, such as a web request body.</p>
+</section>
+
+<!-- ===================== 9 ===================== -->
+<section class="new-page">
+  <h2 class="section" id="s9"><span class="snum">9</span> Inheritance and Interfaces</h2>
+  <p>A class may inherit from one base class and implement any number of interfaces. An
+  <strong>interface</strong> is a named list of method and property signatures that a class must implement; it holds no stored data.
+  Code that accepts the interface works with every class that implements it.
+  File: <code>src/Tutorial/Ch09Interfaces.cs</code>.</p>
+
+  <svg class="diagram" viewBox="0 0 620 262" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="'Nimbus Sans','Liberation Sans',sans-serif">
+    <defs>
+      <marker id="a4" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#ffffff" stroke="#1f3756" stroke-width="1.2"/></marker>
+    </defs>
+    <rect x="160" y="8" width="170" height="44" rx="6" fill="#ffffff" stroke="#46647f" stroke-width="1.5" stroke-dasharray="5 3"/>
+    <text x="245" y="28" text-anchor="middle" font-size="13" font-weight="700" font-family="'Liberation Mono',monospace" fill="#16273d">IShape</text>
+    <text x="245" y="44" text-anchor="middle" font-size="10.5" fill="#5b6470">interface</text>
+    <text x="345" y="28" font-size="12" fill="#1c1c1c">promises Name and Area()</text>
+    <rect x="160" y="84" width="170" height="44" rx="6" fill="#eef3f9" stroke="#1f3756" stroke-width="1.5"/>
+    <text x="245" y="104" text-anchor="middle" font-size="13" font-weight="700" font-family="'Liberation Mono',monospace" fill="#16273d">Shape</text>
+    <text x="245" y="120" text-anchor="middle" font-size="10.5" fill="#5b6470">abstract class</text>
+    <text x="345" y="102" font-size="12" fill="#1c1c1c">adds Describe() (virtual);</text>
+    <text x="345" y="117" font-size="12" fill="#1c1c1c">cannot be created with new</text>
+    <line x1="245" y1="84" x2="245" y2="56" stroke="#1f3756" stroke-width="1.5" stroke-dasharray="5 3" marker-end="url(#a4)"/>
+    <rect x="40" y="160" width="150" height="40" rx="6" fill="#eef7f0" stroke="#2f6b3f" stroke-width="1.5"/>
+    <text x="115" y="185" text-anchor="middle" font-size="13" font-weight="700" fill="#16273d">Circle</text>
+    <rect x="300" y="160" width="150" height="40" rx="6" fill="#eef7f0" stroke="#2f6b3f" stroke-width="1.5"/>
+    <text x="375" y="185" text-anchor="middle" font-size="13" font-weight="700" fill="#16273d">Rectangle</text>
+    <line x1="115" y1="160" x2="215" y2="132" stroke="#1f3756" stroke-width="1.5" marker-end="url(#a4)"/>
+    <line x1="375" y1="160" x2="275" y2="132" stroke="#1f3756" stroke-width="1.5" marker-end="url(#a4)"/>
+    <rect x="300" y="222" width="150" height="34" rx="6" fill="#eef7f0" stroke="#2f6b3f" stroke-width="1.5"/>
+    <text x="375" y="244" text-anchor="middle" font-size="13" font-weight="700" fill="#16273d">Square</text>
+    <line x1="375" y1="222" x2="375" y2="204" stroke="#1f3756" stroke-width="1.5" marker-end="url(#a4)"/>
+    <text x="465" y="244" font-size="12" fill="#1c1c1c">sealed; overrides Describe()</text>
+    <text x="465" y="185" font-size="12" fill="#1c1c1c">override Name, Area()</text>
+    <text x="22" y="226" font-size="11" fill="#5b6470">solid arrow: inherits from</text>
+    <text x="22" y="242" font-size="11" fill="#5b6470">dashed arrow: implements</text>
+  </svg>
+  <p class="caption">Figure 4. The shape types in Ch09Interfaces.cs.</p>
+
+  <h3 class="sub" id="s9-1">9.1&nbsp;&nbsp;The Interface and the Base Class</h3>
+:::file src/Tutorial/Ch09Interfaces.cs :: public interface IShape :: public abstract class Shape
+  <p>The Python version uses an abstract base class:</p>
+:::py
+from abc import ABC, abstractmethod
+
+class Shape(ABC):
+    @property
+    @abstractmethod
+    def name(self) -> str: ...
+
+    @abstractmethod
+    def area(self) -> float: ...
+
+    def describe(self) -> str:
+        return f"{self.name} with area {self.area():.2f}"
+:::
+
+  <h3 class="sub" id="s9-2">9.2&nbsp;&nbsp;The Subclasses</h3>
+:::file src/Tutorial/Ch09Interfaces.cs :: public class Circle : Shape :: public class Rectangle : Shape :: public sealed class Square
+  <table class="data">
+    <thead><tr><th style="width:20%">Keyword</th><th>Meaning</th></tr></thead>
+    <tbody>
+      <tr><td class="c">: Shape</td><td>Inherit from <code>Shape</code>. Python: <code>class Circle(Shape):</code></td></tr>
+      <tr><td class="c">abstract</td><td>No body here; every subclass <em>must</em> override it. An abstract class cannot be created with <code>new</code>.</td></tr>
+      <tr><td class="c">virtual</td><td>Has a body; subclasses <em>may</em> override it.</td></tr>
+      <tr><td class="c">override</td><td>This method replaces the parent's abstract or virtual one. Required; C# never overrides silently.</td></tr>
+      <tr><td class="c">sealed</td><td>No class may inherit from this one.</td></tr>
+      <tr><td class="c">base</td><td>The parent class. <code>base.Describe()</code> calls the parent's version; <code>: base(side, side)</code> calls its constructor. Python: <code>super()</code>.</td></tr>
+    </tbody>
+  </table>
+  <p>In Python every method can be overridden. In C# a method can be overridden only if an ancestor class
+  declares it <code>virtual</code>, <code>abstract</code> or <code>override</code>. An <code>override</code> stays
+  overridable further down: <code>Square</code> overrides <code>Name</code>, which <code>Rectangle</code> already
+  overrode. Marking a method <code>sealed override</code> stops that.</p>
+
+  <h3 class="sub" id="s9-3">9.3&nbsp;&nbsp;Polymorphism</h3>
+  <p><strong>Polymorphism</strong> means one call runs different code depending on the object's actual class.
+  <code>TotalArea</code> accepts any sequence of <code>IShape</code> objects and calls <code>Area()</code> on
+  each. Each object runs its own class's <code>Area()</code>.</p>
+  <p><code>Run</code> passes a <code>List&lt;Shape&gt;</code> where <code>IEnumerable&lt;IShape&gt;</code> is
+  expected. This is allowed because every <code>Shape</code> is an <code>IShape</code>, and
+  <code>IEnumerable</code> only reads items, so nothing of the wrong type can be added through it.
+  The rule is called <strong>covariance</strong>.</p>
+:::file src/Tutorial/Ch09Interfaces.cs :: public static double TotalArea :: var shapes = new ..> Console.WriteLine($"Total area
+:::out
+Circle with area 3.14
+Rectangle with area 6.00
+Square with area 4.00 (all sides equal)
+Total area: 13.14
+:::
+
+  <h3 class="sub" id="s9-4">9.4&nbsp;&nbsp;Type Tests and Pattern Matching</h3>
+  <p><code>shape is Circle c</code> tests the type and, if it matches, gives you a variable <code>c</code>
+  of type <code>Circle</code>. It replaces Python's <code>isinstance</code> plus a separate variable.</p>
+:::file src/Tutorial/Ch09Interfaces.cs :: // Type test plus cast ..> Console.WriteLine(kind)
+  <p>The cases of a switch expression, called arms, are tested in order. <code>Square</code> must come before <code>Rectangle</code>, because a square
+  is also a rectangle and the first match wins.</p>
+
+  <h3 class="sub" id="s9-5">9.5&nbsp;&nbsp;Interface or Abstract Class?</h3>
+  <p>This is a standard interview question. The short answer:</p>
+  <table class="data">
+    <thead><tr><th style="width:26%"></th><th>Interface</th><th>Abstract class</th></tr></thead>
+    <tbody>
+      <tr><td>How many per class</td><td>Any number</td><td>One</td></tr>
+      <tr><td>Stored data (fields)</td><td>No</td><td>Yes</td></tr>
+      <tr><td>Constructors</td><td>No</td><td>Yes</td></tr>
+      <tr><td>Method bodies</td><td>Optional default bodies since C# 8; usually none</td><td>Yes, mixed with abstract members</td></tr>
+      <tr><td>Use when</td><td>Unrelated classes share a capability ("can be discounted")</td><td>Related classes share code ("is a shape")</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ===================== 10 ===================== -->
+<section class="new-page">
+  <h2 class="section" id="s10"><span class="snum">10</span> LINQ</h2>
+  <p>LINQ (Language Integrated Query) is a set of methods for filtering, transforming, sorting and
+  grouping collections. It does the work of Python's list comprehensions, <code>sorted</code>,
+  <code>sum</code>, <code>any</code> and <code>itertools</code>. Most LINQ methods take a lambda. Methods that return a
+  sequence, such as <code>Where</code> and <code>Select</code>, can be chained left to right; methods such as
+  <code>First</code>, <code>Sum</code> and <code>ToList</code> end the chain with a single value or a list. File: <code>src/Tutorial/Ch10Linq.cs</code>.</p>
+
+  <h3 class="sub" id="s10-1">10.1&nbsp;&nbsp;Python to LINQ</h3>
+  <table class="data">
+    <thead><tr><th style="width:52%">Python</th><th>LINQ</th></tr></thead>
+    <tbody>
+      <tr><td class="c">[x for x in xs if x &gt; 0]</td><td class="c">xs.Where(x =&gt; x &gt; 0)</td></tr>
+      <tr><td class="c">[x * 2 for x in xs]</td><td class="c">xs.Select(x =&gt; x * 2)</td></tr>
+      <tr><td class="c">sorted(xs, key=k)</td><td class="c">xs.OrderBy(x =&gt; k(x))</td></tr>
+      <tr><td class="c">sorted(xs, key=k, reverse=True)</td><td class="c">xs.OrderByDescending(...)</td></tr>
+      <tr><td class="c">xs[0]  /  next(iter(xs))</td><td class="c">xs.First()</td></tr>
+      <tr><td class="c">next((x for x in xs if p(x)), None)</td><td class="c">xs.FirstOrDefault(x =&gt; p(x))</td></tr>
+      <tr><td class="c">any(p(x) for x in xs)</td><td class="c">xs.Any(x =&gt; p(x))</td></tr>
+      <tr><td class="c">all(p(x) for x in xs)</td><td class="c">xs.All(x =&gt; p(x))</td></tr>
+      <tr><td class="c">sum(x.price for x in xs)</td><td class="c">xs.Sum(x =&gt; x.Price)</td></tr>
+      <tr><td class="c">len([x for x in xs if p(x)])</td><td class="c">xs.Count(x =&gt; p(x))</td></tr>
+      <tr><td class="c">max(xs, key=k)</td><td class="c">xs.MaxBy(x =&gt; k(x))</td></tr>
+      <tr><td class="c">set(xs)</td><td class="c">xs.Distinct()</td></tr>
+      <tr><td class="c">xs[:3]  /  xs[3:]</td><td class="c">xs.Take(3)  /  xs.Skip(3)</td></tr>
+      <tr><td class="c">defaultdict(list) grouping loop</td><td class="c">xs.GroupBy(x =&gt; x.Key)</td></tr>
+      <tr><td class="c">list(...)  /  {k: v for ...}</td><td class="c">.ToList()  /  .ToDictionary(...)</td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="sub" id="s10-2">10.2&nbsp;&nbsp;Walkthrough</h3>
+  <p>The examples query a list of <code>Employee</code> records.</p>
+:::file src/Tutorial/Ch10Linq.cs :: public record Employee :: // Python: [e.name ..> Console.WriteLine($"Most senior
+:::out
+High earners: Ada, Grace, Barbara
+Most senior: Grace
+:::
+  <p><code>e =&gt; e.Salary &gt; 100_000m</code> is the lambda from section 7.4: for each employee
+  <code>e</code>, keep it if the salary is over 100,000. <code>.ToList()</code> turns the result into a
+  <code>List</code>.</p>
+:::file src/Tutorial/Ch10Linq.cs :: var byDept = Staff ..> {d.Dept,-12}
+:::out
+Engineering  3 people, avg 117667
+Finance      1 people, avg 105000
+Sales        2 people, avg 89000
+:::
+  <ul class="tight">
+    <li><code>GroupBy</code> produces one group per department. Each group <code>g</code> has a
+    <code>Key</code> (the department) and is itself a sequence of employees.</li>
+    <li><code>new { Dept = ..., Count = ... }</code> creates an <strong>anonymous type</strong>: an object
+    with those properties and no declared class. It is like building a small dict, but typed.</li>
+    <li><code>{d.Dept,-12}</code> pads the text to 12 characters, left-aligned. Python: <code>{d.dept:&lt;12}</code>.</li>
+  </ul>
+
+  <h3 class="sub" id="s10-3">10.3&nbsp;&nbsp;Deferred Execution</h3>
+  <p><strong>Deferred execution</strong> means a LINQ query does not run when you write it; it runs each
+  time you loop over it. It is lazy like a Python generator expression, with one difference: a generator is
+  used up after one loop, while a LINQ query runs again on every loop.</p>
+:::file src/Tutorial/Ch10Linq.cs :: // Deferred execution ..> Console.WriteLine($"evens
+  <p>The output is <code>2,4</code>: the 4 was added after the query was written, but before it ran.
+  Two consequences matter in practice:</p>
+  <ul class="tight">
+    <li>Looping over the same query twice runs it twice. Call <code>.ToList()</code> to run it once and keep the result.</li>
+    <li><code>IEnumerable&lt;T&gt;</code>, the type a query returns, means "something you can loop over".
+    It does not mean the items exist yet. A <code>List&lt;T&gt;</code> holds them in memory.</li>
+  </ul>
+  <p>Entity Framework, the standard database library, uses <code>IQueryable&lt;T&gt;</code>. The same
+  LINQ methods are translated into SQL and run in the database instead of in memory.</p>
+
+  <h3 class="sub" id="s10-4">10.4&nbsp;&nbsp;Query Syntax</h3>
+  <p>LINQ has a second, SQL-like syntax. The compiler turns it into the same method calls.
+  Method syntax is more common in modern code; read both.</p>
+:::file src/Tutorial/Ch10Linq.cs :: var engineers = from
+
+  <h3 class="sub" id="s10-5">10.5&nbsp;&nbsp;Extension Methods</h3>
+  <p><code>Where</code> and <code>Select</code> are not defined on <code>List</code>. They are
+  <strong>extension methods</strong>: static methods that the compiler lets you call as if they belonged to
+  the type. The keyword <code>this</code> before the first parameter makes a method an extension method.</p>
+:::file src/Tutorial/Ch10Linq.cs :: public static class EmployeeExtensions :: decimal engPayroll ..> Console.WriteLine($"Engineering payroll
+  <p><code>staff.TotalSalary()</code> compiles to <code>EmployeeExtensions.TotalSalary(staff)</code>.
+  Python has no equivalent; the nearest is a plain function.</p>
+</section>
+
+<!-- ===================== 11 ===================== -->
+<section class="new-page">
+  <h2 class="section" id="s11"><span class="snum">11</span> Exceptions and Cleanup</h2>
+  <p>C# exceptions work like Python's: <code>throw</code> raises one, and <code>try</code> / <code>catch</code>
+  / <code>finally</code> handles it. File: <code>src/Tutorial/Ch11Exceptions.cs</code>.</p>
+
+  <h3 class="sub" id="s11-1">11.1&nbsp;&nbsp;Throwing and Catching</h3>
+:::file src/Tutorial/Ch11Exceptions.cs :: public static int ParseQuantity :: foreach (var input in ..> (checked
+:::out
+parsed 5
+  (checked '5')
+bad format: 'abc' is not a whole number.
+  (checked 'abc')
+out of range: parameter 'text'
+  (checked '-2')
+:::
+  <table class="data">
+    <thead><tr><th>Python</th><th>C#</th></tr></thead>
+    <tbody>
+      <tr><td class="c">raise ValueError("...")</td><td class="c">throw new ArgumentException("...");</td></tr>
+      <tr><td class="c">except ValueError as ex:</td><td class="c">catch (ArgumentException ex)</td></tr>
+      <tr><td class="c">except Exception:</td><td class="c">catch (Exception)</td></tr>
+      <tr><td class="c">raise   (re-raise)</td><td class="c">throw;</td></tr>
+      <tr><td class="c">str(ex)</td><td class="c">ex.Message</td></tr>
+      <tr><td class="c">KeyError / IndexError</td><td class="c">KeyNotFoundException / IndexOutOfRangeException</td></tr>
+      <tr><td class="c">AttributeError on None</td><td class="c">NullReferenceException</td></tr>
+    </tbody>
+  </table>
+  <p>The most common exceptions are <code>ArgumentException</code> and <code>ArgumentNullException</code> (bad
+  input to a method), <code>InvalidOperationException</code> (the object is in the wrong state for this call),
+  <code>NullReferenceException</code>, and <code>FormatException</code> (text that does not parse).</p>
+  <div class="callout">
+    <div class="hd">Interview point &middot; throw; versus throw ex;</div>
+    <p>Inside a <code>catch</code>, <code>throw;</code> re-throws the same exception with its original stack
+    trace. <code>throw ex;</code> re-throws it but resets the stack trace to the current line, which hides
+    where the error started. Use <code>throw;</code>.</p>
+  </div>
+
+  <h3 class="sub" id="s11-2">11.2&nbsp;&nbsp;Custom Exceptions</h3>
+  <p>A custom exception is a class that inherits from <code>Exception</code>. Add properties for any extra data
+  the catching code needs, such as <code>OrderId</code>. <code>: base(message)</code> passes the message to <code>Exception</code>'s constructor.</p>
+:::file src/Tutorial/Orders/Models.cs :: public class OrderException
+
+  <h3 class="sub" id="s11-3">11.3&nbsp;&nbsp;using and IDisposable</h3>
+  <p>A <code>using</code> block guarantees that cleanup runs when the block ends, even if an exception is
+  thrown. It is Python's <code>with</code> statement. The cleanup method is <code>Dispose()</code>, from the
+  <code>IDisposable</code> interface, which plays the role of <code>__exit__</code>.</p>
+:::file src/Tutorial/Ch11Exceptions.cs :: using (var log = :: public class TempLog
+:::out
+open demo
+[demo] inside the using block
+close demo
+:::
+  <p><code>Dispose</code> releases a file handle or connection immediately; the garbage collector frees
+  memory only at an unpredictable time. Files, database connections and network streams all implement
+  <code>IDisposable</code>.</p>
+  <p>Modern code often writes the short form, which disposes at the end of the
+  enclosing block:</p>
+:::cs
+using var reader = new StreamReader("data.txt");   // Python: with open(...) as reader:
+string text = reader.ReadToEnd();
+:::
+</section>
+
+<!-- ===================== 12 ===================== -->
+<section class="new-page">
+  <h2 class="section" id="s12"><span class="snum">12</span> Async and Await</h2>
+  <p><code>async</code> and <code>await</code> let a method wait for slow input or output (a web request,
+  a database query, a file) without blocking a thread. The keywords and their purpose match Python's
+  <code>asyncio</code>. File: <code>src/Tutorial/Ch12Async.cs</code>.</p>
+
+  <h3 class="sub" id="s12-1">12.1&nbsp;&nbsp;Walkthrough</h3>
+:::file src/Tutorial/Ch12Async.cs :: public static async Task<string> FetchAsync :: public static async Task RunAsync
+:::out
+sequential took ~600 ms
+concurrent took ~300 ms
+first finished after 300 ms
+second finished after 300 ms
+A finished after 300 ms
+B finished after 300 ms
+:::
+  <ul class="tight">
+    <li><code>Task&lt;string&gt;</code> is an object that represents an operation in progress; when the operation finishes, the task holds its <code>string</code> result.
+    <code>Task</code> without a type argument returns nothing. Python's closest equivalent is an
+    <code>asyncio.Task</code> from <code>asyncio.create_task</code>, which also starts running at once.</li>
+    <li><code>await</code> pauses this method until the task finishes, and frees the thread for other work meanwhile.</li>
+    <li><code>Task.WhenAll(a, b)</code> waits for both. It is <code>asyncio.gather</code>.</li>
+    <li>By convention, async method names end in <code>Async</code>.</li>
+  </ul>
+
+  <h3 class="sub" id="s12-2">12.2&nbsp;&nbsp;Differences from Python</h3>
+  <ul class="tight">
+    <li><strong>Calling an async method starts it.</strong> <code>FetchAsync("A", 300)</code> begins running
+    at once and returns a running <code>Task</code>. A Python coroutine does nothing until it is awaited or
+    scheduled. This is why lines <code>a</code> and <code>b</code> above run at the same time.</li>
+    <li><strong>No event loop to start.</strong> There is no <code>asyncio.run()</code>. <code>Main</code>
+    (or top-level code) can itself use <code>await</code>.</li>
+    <li><strong>Real threads.</strong> After an <code>await</code>, the method may continue on a different
+    thread-pool thread. For CPU-heavy work, <code>Task.Run(() =&gt; ...)</code> runs code on another thread, and
+    threads run in parallel.</li>
+  </ul>
+
+  <h3 class="sub" id="s12-3">12.3&nbsp;&nbsp;Rules Interviewers Check</h3>
+  <ul class="tight">
+    <li>Do not call <code>.Result</code> or <code>.Wait()</code> on a task. Both block the thread until the
+    task ends, which wastes the thread and can deadlock in UI and older ASP.NET apps. Use <code>await</code>.</li>
+    <li>Do not write <code>async void</code> methods, except for event handlers. A caller cannot await them, and
+    their exceptions crash the process. Return <code>Task</code>.</li>
+    <li>Callers of an async method usually become async too, so that they can <code>await</code> it. This is normal.</li>
+  </ul>
+</section>
+
+<!-- ===================== 13 ===================== -->
+<section class="new-page">
+  <h2 class="section" id="s13"><span class="snum">13</span> Walkthrough: The Order System</h2>
+  <p>The order system in <code>src/Tutorial/Orders/</code> turns an order into a receipt. It checks stock,
+  removes the items from stock, applies a discount and adds tax. It is a small, realistic program that uses
+  records, classes, an interface, a dictionary, LINQ and exceptions together. This is the code to practise
+  changing.</p>
+
+  <h3 class="sub" id="s13-1">13.1&nbsp;&nbsp;The Data Types</h3>
+:::file src/Tutorial/Orders/Models.cs :: public record Product :: public record OrderLine :: public class Order :: public record Receipt
+  <ul class="tight">
+    <li><code>Product</code>, <code>OrderLine</code> and <code>Receipt</code> are records: data that does not
+    change after creation.</li>
+    <li><code>OrderLine</code> adds a computed property, <code>Subtotal</code>, inside the record's braces.</li>
+    <li><code>Order</code> is a class because lines are added to it over time.</li>
+    <li><code>Lines { get; } = new();</code> creates an empty list when the order is created. The list itself
+    can grow, but the property can never be pointed at a different list.</li>
+    <li><code>Lines.Sum(line =&gt; line.Subtotal)</code> is LINQ: Python's <code>sum(l.subtotal for l in self.lines)</code>.</li>
+  </ul>
+
+  <h3 class="sub" id="s13-2">13.2&nbsp;&nbsp;Discount Rules</h3>
+  <p><code>IDiscountPolicy</code> is an interface with one method. Each discount rule is a class that
+  implements it. <code>OrderService</code> depends only on the interface, so a new rule needs a new class and
+  no change to <code>OrderService</code>.</p>
+:::file src/Tutorial/Orders/Discounts.cs :: public interface IDiscountPolicy :: public class NoDiscount :: public class BulkDiscount
+
+  <h3 class="sub" id="s13-3">13.3&nbsp;&nbsp;Checkout</h3>
+  <p><code>Checkout</code> either returns a <code>Receipt</code> or throws <code>OrderException</code>.
+  It checks every line before it removes any stock, so a failed order leaves the stock unchanged.</p>
+
+  <svg class="diagram" viewBox="0 0 620 330" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="'Nimbus Sans','Liberation Sans',sans-serif">
+    <defs>
+      <marker id="a5" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1f3756"/></marker>
+      <marker id="a5r" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#b03a3a"/></marker>
+    </defs>
+    <rect x="12" y="8" width="180" height="40" rx="7" fill="#eef3f9" stroke="#1f3756" stroke-width="1.5"/>
+    <text x="102" y="33" text-anchor="middle" font-size="12.5" font-weight="700" font-family="'Liberation Mono',monospace" fill="#16273d">Checkout(order)</text>
+    <line x1="102" y1="48" x2="102" y2="70" stroke="#1f3756" stroke-width="1.5" marker-end="url(#a5)"/>
+    <rect x="12" y="72" width="180" height="40" rx="7" fill="#eef3f9" stroke="#1f3756" stroke-width="1.5"/>
+    <text x="102" y="97" text-anchor="middle" font-size="12.5" font-weight="700" fill="#16273d">Any lines?</text>
+    <line x1="102" y1="112" x2="102" y2="134" stroke="#1f3756" stroke-width="1.5" marker-end="url(#a5)"/>
+    <text x="110" y="128" font-size="10.5" fill="#2f6b3f">yes</text>
+    <rect x="12" y="136" width="180" height="40" rx="7" fill="#eef3f9" stroke="#1f3756" stroke-width="1.5"/>
+    <text x="102" y="161" text-anchor="middle" font-size="12.5" font-weight="700" fill="#16273d">Every line in stock?</text>
+    <line x1="102" y1="176" x2="102" y2="198" stroke="#1f3756" stroke-width="1.5" marker-end="url(#a5)"/>
+    <text x="110" y="192" font-size="10.5" fill="#2f6b3f">yes</text>
+    <rect x="12" y="200" width="180" height="40" rx="7" fill="#eef3f9" stroke="#1f3756" stroke-width="1.5"/>
+    <text x="102" y="225" text-anchor="middle" font-size="12.5" font-weight="700" fill="#16273d">Remove from stock</text>
+    <line x1="102" y1="240" x2="102" y2="262" stroke="#1f3756" stroke-width="1.5" marker-end="url(#a5)"/>
+    <rect x="12" y="264" width="180" height="56" rx="7" fill="#eef7f0" stroke="#2f6b3f" stroke-width="1.5"/>
+    <text x="102" y="285" text-anchor="middle" font-size="12.5" font-weight="700" fill="#2f6b3f">return Receipt</text>
+    <text x="102" y="302" text-anchor="middle" font-size="10.5" fill="#5b6470">subtotal &#8722; discount + tax</text>
+    <!-- captions -->
+    <text x="210" y="97" font-size="12" fill="#1c1c1c">order.Lines.Count == 0</text>
+    <text x="210" y="157" font-size="12" fill="#1c1c1c">first loop: StockOf(sku) &lt; Quantity</text>
+    <text x="210" y="172" font-size="12" fill="#1c1c1c">for any line</text>
+    <text x="210" y="225" font-size="12" fill="#1c1c1c">second loop: inventory.Remove(...)</text>
+    <text x="210" y="285" font-size="12" fill="#1c1c1c">discount from IDiscountPolicy;</text>
+    <text x="210" y="300" font-size="12" fill="#1c1c1c">tax = 8% of (subtotal &#8722; discount)</text>
+    <!-- exception -->
+    <rect x="440" y="104" width="168" height="48" rx="7" fill="#fcf0f0" stroke="#b03a3a" stroke-width="1.5"/>
+    <text x="524" y="125" text-anchor="middle" font-size="12.5" font-weight="700" fill="#b03a3a">throw</text>
+    <text x="524" y="142" text-anchor="middle" font-size="12" font-weight="700" font-family="'Liberation Mono',monospace" fill="#b03a3a">OrderException</text>
+    <path d="M192,82 L420,82 L420,116 L436,116" fill="none" stroke="#b03a3a" stroke-width="1.5" marker-end="url(#a5r)"/>
+    <path d="M192,142 L420,142 L420,136 L436,136" fill="none" stroke="#b03a3a" stroke-width="1.5" marker-end="url(#a5r)"/>
+    <text x="398" y="137" text-anchor="end" font-size="10.5" fill="#b03a3a">short of stock</text>
+    <text x="398" y="77" text-anchor="end" font-size="10.5" fill="#b03a3a">no lines</text>
+  </svg>
+  <p class="caption">Figure 5. <code>OrderService.Checkout</code>. Either check can throw; only a fully valid order changes stock.</p>
+
+:::file src/Tutorial/Orders/OrderService.cs :: public class Inventory
+:::file src/Tutorial/Orders/OrderService.cs :: public class OrderService
+
+  <h3 class="sub" id="s13-4">13.4&nbsp;&nbsp;Dependency Injection</h3>
+  <p><strong>Dependency injection</strong> (DI) means a class receives the objects it works with through its
+  constructor instead of creating them. <code>OrderService</code> receives an <code>Inventory</code> and an
+  <code>IDiscountPolicy</code>. It never writes <code>new BulkDiscount()</code> itself.</p>
+  <p>This gives two benefits:</p>
+  <ul class="tight">
+    <li><strong>Swapping behaviour.</strong> The caller decides which discount rule applies. <code>Ch13Orders</code>
+    passes <code>BulkDiscount</code>; a test passes <code>NoDiscount</code>.</li>
+    <li><strong>Testing.</strong> A test can pass a simplified or fake object. In larger code bases, a mocking
+    library such as Moq generates fakes from an interface.</li>
+  </ul>
+  <p><code>readonly</code> on the two fields means they can be assigned only in the constructor. A
+  <code>const</code> such as <code>TaxRate</code> is fixed at compile time and is automatically static.</p>
+
+  <h3 class="sub" id="s13-5">13.5&nbsp;&nbsp;Running It</h3>
+:::file src/Tutorial/Ch13Orders.cs :: var keyboard ..> Console.WriteLine($"Mice left
+  <p>Run it with <code>dotnet run --project src/Tutorial -- 13</code>:</p>
+:::out
+ORD-1: subtotal 50.00 - discount 0.00 + tax 4.00 = 54.00
+ORD-2: subtotal 225.00 - discount 22.50 + tax 16.20 = 218.70
+ORD-3 rejected: Only 0 of Monitor in stock, 1 requested.
+Mice left: 8
+:::
+  <p>ORD-1 is below the 100.00 threshold, so it gets no discount. ORD-2 is 225.00, so it gets 10% off
+  (22.50), and tax is 8% of the remaining 202.50. ORD-3 fails because ORD-2 bought the only monitor.</p>
+
+  <h3 class="sub" id="s13-6">13.6&nbsp;&nbsp;The Unit Tests</h3>
+  <p>The tests use <strong>xUnit</strong>, the most common .NET test framework. NUnit and MSTest are the
+  other two you may hear named. Each test method follows <strong>Arrange, Act, Assert</strong>: set up
+  objects, call the method under test, check the result.</p>
+:::file tests/Tutorial.Tests/OrderServiceTests.cs :: private static (OrderService Service :: public void Checkout_NotEnoughStock
+  <table class="data">
+    <thead><tr><th>pytest</th><th>xUnit</th></tr></thead>
+    <tbody>
+      <tr><td class="c">def test_x():</td><td class="c">[Fact] public void X()</td></tr>
+      <tr><td class="c">@pytest.mark.parametrize</td><td class="c">[Theory] + [InlineData(...)]</td></tr>
+      <tr><td class="c">assert actual == expected</td><td class="c">Assert.Equal(expected, actual)</td></tr>
+      <tr><td class="c">with pytest.raises(E):</td><td class="c">Assert.Throws&lt;E&gt;(() =&gt; ...)</td></tr>
+      <tr><td class="c">pytest</td><td class="c">dotnet test</td></tr>
+    </tbody>
+  </table>
+  <p>Text in square brackets, such as <code>[Fact]</code>, is an <strong>attribute</strong>: a label attached
+  to a class or method that other code reads at run time. The test runner finds tests by looking for
+  <code>[Fact]</code>. Attributes look like Python decorators but only attach information; they do not wrap
+  the method.</p>
+  <p>Note the argument order: <code>Assert.Equal</code> takes the expected value first.</p>
+</section>
+
+<!-- ===================== 14 ===================== -->
+<section class="new-page">
+  <h2 class="section" id="s14"><span class="snum">14</span> Walkthrough: The Web API</h2>
+  <p>Most C# jobs build web back ends with <strong>ASP.NET Core</strong>, the .NET web framework. Its
+  "minimal API" style resembles FastAPI or Flask: you map a URL to a function. The project
+  <code>src/Tutorial.Api</code> serves the order system over HTTP in about 60 lines.</p>
+
+  <h3 class="sub" id="s14-1">14.1&nbsp;&nbsp;Registering Services</h3>
+:::file src/Tutorial.Api/Program.cs :: var builder = ..> var app =
+  <p><code>builder.Services</code> is the list of registrations for the <strong>DI container</strong>, the
+  object that creates registered types and hands them to code that asks for them. <code>builder.Build()</code>
+  turns the list into the container. <code>AddSingleton&lt;OrderService&gt;()</code> registers the
+  class without creating it. The first time something needs an <code>OrderService</code>, the container reads
+  its constructor, finds an <code>Inventory</code> and an <code>IDiscountPolicy</code> already registered, and
+  passes them in. This is section 13.4's dependency injection, done automatically.</p>
+  <p>Every registration has a <strong>lifetime</strong>. Interviewers ask about these three:</p>
+  <table class="data">
+    <thead><tr><th style="width:22%">Lifetime</th><th>The container creates</th><th style="width:32%">Typical use</th></tr></thead>
+    <tbody>
+      <tr><td class="c">AddSingleton</td><td>One object for the whole application</td><td>Caches, configuration, this demo's shared stock</td></tr>
+      <tr><td class="c">AddScoped</td><td>One object per HTTP request</td><td>Database context (EF Core <code>DbContext</code>)</td></tr>
+      <tr><td class="c">AddTransient</td><td>A new object every time one is requested</td><td>Small stateless helpers</td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="sub" id="s14-2">14.2&nbsp;&nbsp;Endpoints</h3>
+:::file src/Tutorial.Api/Program.cs :: // 2. Map URLs ..> return Results.BadRequest :: public record LineRequest ..> public record OrderRequest
+  <ul class="tight">
+    <li><code>MapGet</code> and <code>MapPost</code> connect an HTTP method and URL to a lambda. FastAPI writes
+    the same thing as <code>@app.get("/products")</code>.</li>
+    <li>ASP.NET fills each lambda parameter from one of three places. <code>{sku}</code> in the route fills
+    <code>string sku</code>. A registered type, such as <code>Inventory</code>, comes from the DI container.
+    Any other class or record, such as <code>OrderRequest</code>, is read from the JSON request body.</li>
+    <li>Returned objects are converted to JSON. Property names become camelCase: <code>OrderId</code> becomes
+    <code>"orderId"</code>.</li>
+    <li><code>Results.Ok</code>, <code>Results.BadRequest</code> and <code>Results.NotFound</code> set the
+    status code: 200, 400 and 404.</li>
+    <li><code>catch (Exception ex) when (...)</code> is an <strong>exception filter</strong>: the
+    <code>catch</code> runs only if the condition is true.</li>
+  </ul>
+
+  <h3 class="sub" id="s14-3">14.3&nbsp;&nbsp;Trying It</h3>
+:::out Terminal 1
+dotnet run --project src/Tutorial.Api --urls http://localhost:5239
+:::
+:::out Terminal 2
+curl localhost:5239/products
+[{"sku":"KB-01","name":"Keyboard","price":45.00}, ...]
+
+curl -X POST localhost:5239/orders -H 'Content-Type: application/json' \
+     -d '{"customer":"Ada","lines":[{"sku":"MN-03","quantity":1}]}'
+{"orderId":"ORD-1518","subtotal":180.00,"discount":18.00,"tax":12.96,"total":174.96}
+
+curl -X POST localhost:5239/orders -H 'Content-Type: application/json' \
+     -d '{"customer":"Ada","lines":[{"sku":"MN-03","quantity":9}]}'
+{"error":"Only 4 of Monitor in stock, 9 requested."}         (HTTP 400)
+:::
+  <p>The order id is random, so yours will differ. Stop the server with Ctrl+C.</p>
+  <p>Larger applications use <strong>controllers</strong> instead of lambdas: classes whose methods are marked
+  with attributes such as <code>[HttpGet("products")]</code>. The ideas are the same. Data storage usually goes
+  through <strong>Entity Framework Core</strong> (EF Core), an ORM comparable to SQLAlchemy or the Django ORM.</p>
+</section>
+
+<!-- ===================== 15 ===================== -->
+<section class="new-page">
+  <h2 class="section" id="s15"><span class="snum">15</span> Hands-on Drills</h2>
+  <p>Each drill is a small change to the companion project, ordered from easiest to hardest. Run the
+  stated command after each change. Solutions are in appendix A. Before starting, check that the project is
+  clean: <code>dotnet test</code> should report 8 passed.</p>
+  <div class="note"><span class="lbl">Undo.</span> The project is a git repository. After a drill,
+  <code>git checkout -- .</code> restores every file to its committed state. To keep your answers instead,
+  work on a branch: <code>git switch -c drills</code>.</div>
+
+  <h3 class="sub" id="s15-1">15.1&nbsp;&nbsp;Drill 1: Read a Failing Test</h3>
+  <p>In <code>Orders/OrderService.cs</code>, change <code>TaxRate</code> from <code>0.08m</code> to <code>0.10m</code>.</p>
+  <ul class="tight">
+    <li>Predict the new totals for ORD-1 and ORD-2, then check with <code>dotnet run --project src/Tutorial -- 13</code>.</li>
+    <li>Run <code>dotnet test</code>. Two tests fail. Find the "Expected" and "Actual" lines in the output and
+    explain each number.</li>
+    <li>Change the rate back.</li>
+  </ul>
+
+  <h3 class="sub" id="s15-2">15.2&nbsp;&nbsp;Drill 2: Read Compiler Errors</h3>
+  <p>Make each change to <code>Ch03Basics.cs</code> on its own, run <code>dotnet build</code>, read the error,
+  and undo it. The error format is <code>File(line,column): error CODE: message</code>.</p>
+  <table class="data">
+    <thead><tr><th style="width:44%">Change</th><th>Error you will see</th></tr></thead>
+    <tbody>
+      <tr><td>Delete the <code>;</code> after <code>int year = 1843</code></td><td><code>CS1002: ; expected</code></td></tr>
+      <tr><td>Change <code>1843</code> to <code>"1843"</code></td><td><code>CS0029: Cannot implicitly convert type 'string' to 'int'</code></td></tr>
+      <tr><td>Change <code>Console</code> to <code>console</code></td><td><code>CS0103: The name 'console' does not exist in the current context</code></td></tr>
+      <tr><td>Add the line <code>var acct = new BankAccount();</code></td><td><code>CS7036: There is no argument given that corresponds to the required parameter 'owner'</code></td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="sub" id="s15-3">15.3&nbsp;&nbsp;Drill 3: Find a Bug with a Test</h3>
+  <p><code>BankAccount.Withdraw</code> accepts a negative amount, and <code>Withdraw(-50m)</code> adds money.
+  <code>Deposit</code> rejects non-positive amounts, but <code>Withdraw</code> does not.</p>
+  <ol class="tight">
+    <li>In <code>BankAccountTests.cs</code>, add a <code>[Fact]</code> named <code>Withdraw_Negative_Throws</code>
+    that expects <code>ArgumentOutOfRangeException</code>.</li>
+    <li>Run <code>dotnet test</code> and watch the new test fail.</li>
+    <li>Fix <code>Withdraw</code> and watch it pass. This order (failing test, then fix) is test-driven development.</li>
+  </ol>
+
+  <h3 class="sub" id="s15-4">15.4&nbsp;&nbsp;Drill 4: Add a Method</h3>
+  <p>Add <code>public void TransferTo(BankAccount other, decimal amount)</code> to <code>BankAccount</code>.
+  It moves money from this account to <code>other</code>. Add a test that transfers 40 from an account
+  holding 100 and checks both balances. Hint: reuse <code>Withdraw</code> and <code>Deposit</code>.</p>
+
+  <h3 class="sub" id="s15-5">15.5&nbsp;&nbsp;Drill 5: A New Subclass</h3>
+  <p>In <code>Ch09Interfaces.cs</code>, add a <code>Triangle</code> class that inherits from <code>Shape</code>,
+  with a base length and a height. Area is half of base times height. Add <code>new Triangle(3, 4)</code> to
+  the <code>shapes</code> list. Expected new output lines: <code>Triangle with area 6.00</code> and
+  <code>Total area: 19.14</code>.</p>
+  <p>Note: <code>base</code> is a keyword, so a parameter cannot be named <code>base</code>. Use <code>baseLength</code>.</p>
+
+  <h3 class="sub" id="s15-6">15.6&nbsp;&nbsp;Drill 6: A LINQ Query</h3>
+  <p>In <code>Ch10Linq.Run</code>, print the highest-paid employee in each department. Expected output:</p>
+:::out
+Top in Engineering: Grace
+Top in Sales: Alan
+Top in Finance: Barbara
+:::
+  <p>Hint: <code>GroupBy</code>, then for each group sort by salary, highest first, and take the first.</p>
+
+  <h3 class="sub" id="s15-7">15.7&nbsp;&nbsp;Drill 7: A New Discount Rule</h3>
+  <p>In <code>Orders/Discounts.cs</code>, write <code>LoyaltyDiscount</code>, an <code>IDiscountPolicy</code>
+  that gives 5% off to customers whose names are in a set passed to its constructor. In <code>Ch13Orders.cs</code>,
+  pass <code>new LoyaltyDiscount(new[] { "Ada" })</code> instead of <code>new BulkDiscount()</code>.
+  Do not change <code>OrderService</code>. Expected:</p>
+:::out
+ORD-1: subtotal 50.00 - discount 2.50 + tax 3.80 = 51.30
+ORD-2: subtotal 225.00 - discount 0.00 + tax 18.00 = 243.00
+:::
+  <p>Afterwards, say in one sentence why <code>OrderService</code> did not need to change. That sentence is
+  an interview answer about interfaces and dependency injection.</p>
+
+  <h3 class="sub" id="s15-8">15.8&nbsp;&nbsp;Drill 8: A New Endpoint</h3>
+  <p>In <code>src/Tutorial.Api/Program.cs</code>, add <code>POST /stock/{sku}/{quantity}</code>, which restocks
+  a product and returns the new stock level. Place it before <code>app.Run()</code>. Restart the server, then test it (a fresh server
+  holds 5 monitors):</p>
+:::out
+curl -X POST localhost:5239/stock/MN-03/10
+{"sku":"MN-03","inStock":15}
+:::
+</section>
+
+<!-- ===================== 16 ===================== -->
+<section class="new-page">
+  <h2 class="section" id="s16"><span class="snum">16</span> Interview Quick Reference</h2>
+  <p>Each answer below is short enough to say aloud. Each one points to the example in the companion
+  project that you can describe.</p>
+
+  <h3 class="sub" id="s16-1">16.1&nbsp;&nbsp;Likely Questions</h3>
+
+  <div class="qa"><div class="q">What is the difference between a value type and a reference type?</div>
+  <p>A value type variable holds its data, and assignment copies it: numbers, <code>bool</code>,
+  <code>struct</code>. A reference type variable holds a reference to an object, and assignment copies
+  the reference, so two variables can share one object: classes, records, strings, arrays, lists. (Section 4.4.)</p></div>
+
+  <div class="qa"><div class="q">Class, struct or record?</div>
+  <p>A class is a reference type compared by identity, for objects with behaviour and state. A record is a
+  reference type compared by value, for data. A struct is a value type, for small values. In the project,
+  <code>BankAccount</code> is a class, <code>Receipt</code> a record, <code>Temperature</code> a struct.</p></div>
+
+  <div class="qa"><div class="q">Interface or abstract class?</div>
+  <p>A class can implement many interfaces but inherit only one class. An interface lists members that
+  implementing classes must provide, and holds no stored data. An abstract class shares code and fields among related classes. I would use
+  <code>IDiscountPolicy</code> as the interface example and <code>Shape</code> as the abstract class.</p></div>
+
+  <div class="qa"><div class="q">What do abstract, virtual and override mean?</div>
+  <p><code>abstract</code>: no body here, subclasses must provide one. <code>virtual</code>: has a body,
+  subclasses may replace it. <code>override</code>: this subclass method replaces the parent's. A method
+  without <code>virtual</code> or <code>abstract</code> cannot be overridden.</p></div>
+
+  <div class="qa"><div class="q">What are the four pillars of object-oriented programming?</div>
+  <p><strong>Encapsulation</strong>: a class guards its own data (<code>BankAccount._balance</code> is private;
+  changes go through <code>Deposit</code>). <strong>Abstraction</strong>: callers call one public method and do not
+  see the steps inside it (<code>Checkout</code>). <strong>Inheritance</strong>: a class reuses a parent's code
+  (<code>Square : Rectangle</code>). <strong>Polymorphism</strong>: one call runs different code per type
+  (<code>shape.Area()</code>).</p></div>
+
+  <div class="qa"><div class="q">What is SOLID?</div>
+  <p>Five design rules. <strong>S</strong>ingle responsibility: one reason to change per class.
+  <strong>O</strong>pen/closed: add behaviour with new code, not edits (a new <code>IDiscountPolicy</code>).
+  <strong>L</strong>iskov substitution: a subclass must work wherever its parent is expected.
+  <strong>I</strong>nterface segregation: small, focused interfaces. <strong>D</strong>ependency inversion:
+  depend on interfaces, not concrete classes (<code>OrderService</code> takes <code>IDiscountPolicy</code>).</p></div>
+
+  <div class="qa"><div class="q">What is dependency injection, and what are the lifetimes?</div>
+  <p>A class receives the objects it uses through its constructor instead of creating them, which makes them
+  swappable and testable. ASP.NET Core's container creates them for you. Singleton: one for the app. Scoped:
+  one per request. Transient: new each time. (Sections 13.4 and 14.1.)</p></div>
+
+  <div class="qa"><div class="q">What is LINQ, and what is deferred execution?</div>
+  <p>LINQ is a set of methods, such as <code>Where</code>, <code>Select</code> and <code>GroupBy</code>, for
+  querying any collection. A query runs when you loop over it, not when you write it. <code>ToList()</code>
+  runs it once and stores the result. Against a database, EF Core translates the same query into SQL. (Chapter 10.)</p></div>
+
+  <div class="qa"><div class="q">IEnumerable versus List?</div>
+  <p><code>IEnumerable&lt;T&gt;</code> is an interface meaning "can be looped over"; it may be a lazy query.
+  <code>List&lt;T&gt;</code> is a concrete in-memory collection with indexing and <code>Add</code>. Accept
+  <code>IEnumerable</code> in parameters when you only loop, as <code>TotalArea</code> does.</p></div>
+
+  <div class="qa"><div class="q">How do async and await work?</div>
+  <p>An async method returns a <code>Task</code>. <code>await</code> pauses the method until the task finishes,
+  releasing the thread meanwhile, so a server can handle other requests while waiting on I/O. Use
+  Start several tasks, then <code>await Task.WhenAll(...)</code> to wait for all of them. Avoid <code>.Result</code>, <code>.Wait()</code> and
+  <code>async void</code>. (Chapter 12.)</p></div>
+
+  <div class="qa"><div class="q">How is memory managed? What is IDisposable?</div>
+  <p>A garbage collector frees objects that nothing references. It runs at times you do not control.
+  <code>IDisposable</code> and <code>using</code> release resources such as files and database connections at a
+  known point, the way Python's <code>with</code> does. (Section 11.3.)</p></div>
+
+  <div class="qa"><div class="q">const, readonly and static?</div>
+  <p><code>const</code>: a value fixed at compile time, such as <code>TaxRate</code>. <code>readonly</code>: a
+  field assigned once, in the constructor, such as <code>OrderService._inventory</code>. <code>static</code>:
+  belongs to the class, not to each object.</p></div>
+
+  <div class="qa"><div class="q">== versus Equals?</div>
+  <p>For classes, <code>==</code> compares identity unless the class overrides it. Records and
+  <code>string</code> override it to compare contents, so <code>"a" == "a"</code> is true. <code>Equals</code>
+  is the method form, which types override to define value equality.</p></div>
+
+  <div class="qa"><div class="q">Why is string immutable, and what is StringBuilder?</div>
+  <p>A <code>string</code> never changes; every edit makes a new string, as in Python. Immutability makes strings
+  safe to share between threads and to use as dictionary keys. Building a long string
+  with <code>+=</code> in a loop copies it every time. <code>StringBuilder</code> appends into one buffer, like
+  collecting parts in a list and calling <code>"".join(parts)</code>.</p></div>
+
+  <div class="qa"><div class="q">What are generics?</div>
+  <p>Types and methods with a type placeholder, such as <code>List&lt;T&gt;</code>. One definition works for
+  many types and stays type-checked. <code>where T : IShape</code> restricts what <code>T</code> can be.</p></div>
+
+  <div class="qa"><div class="q">What are delegates and events?</div>
+  <p>A delegate is a type for a function reference; <code>Func</code> and <code>Action</code> are the built-in
+  ones, and a lambda can be assigned to one. An <code>event</code> is a delegate field that outside code can only
+  subscribe to with <code>+=</code> or unsubscribe from with <code>-=</code>; the owning class calls the
+  subscribers when something happens. Events are common in UI code. Python's closest match is passing callback functions.</p></div>
+
+  <div class="qa"><div class="q">How would you test this class?</div>
+  <p>With xUnit: one <code>[Fact]</code> per behaviour, each following arrange, act, assert. Pass fake
+  dependencies through the constructor; a library such as Moq creates them from interfaces.
+  <code>OrderServiceTests</code> is the example.</p></div>
+
+  <h3 class="sub" id="s16-2">16.2&nbsp;&nbsp;Talking About Your Background</h3>
+  <div class="callout">
+    <div class="hd">Suggested answer</div>
+    <p>Say that your strongest language is Python, and that you have studied C# and can read it and make
+    changes. Name the mappings you know: dataclasses to records, <code>with</code> to <code>using</code>,
+    comprehensions to LINQ, <code>asyncio</code> to <code>Task</code>, pytest to xUnit; dependency injection works
+    the same in both. Then prove it by explaining a piece of code. Interviewers trust a precise explanation of a small
+    thing more than a broad claim.</p>
+  </div>
+
+  <h3 class="sub" id="s16-3">16.3&nbsp;&nbsp;Reading Unfamiliar C# Code</h3>
+  <ol class="tight">
+    <li>Open the <code>.csproj</code>: target framework (<code>net48</code> means .NET Framework,
+    <code>net8.0</code> or later means modern .NET) and package references.</li>
+    <li>Find the entry point: <code>Program.cs</code>, either top-level statements or <code>static void Main</code>.</li>
+    <li>In a web app, read the <code>builder.Services.Add...</code> lines. They list every service registered with the DI container.
+    Then find the routes: <code>Map...</code> calls or controller classes with <code>[Http...]</code> attributes.</li>
+    <li>For any class, read the constructor parameters first. They are its dependencies.</li>
+    <li>Names starting with <code>I</code> are interfaces. In an IDE, "Go to Implementation" finds the classes.</li>
+    <li>Read <code>using</code> lines at the top to see what each file depends on.</li>
+    <li>Methods ending in <code>Async</code> return a <code>Task</code>; follow the <code>await</code>s.</li>
+    <li>Read the tests. Test names state the intended behaviour in plain words.</li>
+  </ol>
+
+  <h3 class="sub" id="s16-4">16.4&nbsp;&nbsp;Glossary</h3>
+  <table class="data">
+    <thead><tr><th style="width:25%">Term</th><th>Meaning</th></tr></thead>
+    <tbody>
+      <tr><td>Assembly</td><td>A compiled <code>.dll</code> or <code>.exe</code>; the output of one project.</td></tr>
+      <tr><td>Attribute</td><td>A label in square brackets attached to code, read by tools or frameworks: <code>[Fact]</code>.</td></tr>
+      <tr><td>CLR</td><td>The runtime that executes .NET programs and collects garbage.</td></tr>
+      <tr><td>Delegate</td><td>A type describing a function signature; <code>Func</code>, <code>Action</code>.</td></tr>
+      <tr><td>DTO</td><td>Data transfer object: a type that only holds data, often a record.</td></tr>
+      <tr><td>EF Core</td><td>Entity Framework Core, the standard ORM.</td></tr>
+      <tr><td>IL</td><td>Intermediate Language: the compiled form inside a <code>.dll</code>.</td></tr>
+      <tr><td>JIT</td><td>Just-in-time compiler: turns each method's IL into machine code when the method is first called.</td></tr>
+      <tr><td>LINQ</td><td>Query methods over collections: <code>Where</code>, <code>Select</code>, ...</td></tr>
+      <tr><td>Namespace</td><td>A named group of types: <code>Tutorial.Orders</code>.</td></tr>
+      <tr><td>NuGet</td><td>The package registry and package format.</td></tr>
+      <tr><td>Property</td><td>A member read and written like a field, backed by get/set code.</td></tr>
+      <tr><td>Solution</td><td>A <code>.sln</code> or <code>.slnx</code> file listing projects that build together.</td></tr>
+      <tr><td>Task</td><td>An object representing an operation that finishes later; what async methods return.</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ===================== A ===================== -->
+<section class="new-page">
+  <h2 class="section" id="sA"><span class="snum">A</span> Drill Solutions</h2>
+  <p>Each solution below was applied to a copy of the project and built. With all of them in place, all 10 tests pass
+  and the outputs match those stated in chapter 15.</p>
+
+  <h3 class="sub" id="sA-1">A.1&nbsp;&nbsp;Drill 1</h3>
+  <p>ORD-1: tax 5.00, total 55.00. ORD-2: tax 20.25, total 222.75. <code>dotnet test</code> reports:</p>
+:::out
+Failed Tutorial.Tests.OrderServiceTests.Checkout_LargeOrder_GetsBulkDiscount
+  Assert.Equal() Failure: Values differ
+  Expected: 174.96
+  Actual:   178.20
+Failed Tutorial.Tests.OrderServiceTests.Checkout_SmallOrder_AddsTaxOnly
+  Assert.Equal() Failure: Values differ
+  Expected: 4.00
+  Actual:   5.00
+:::
+  <p>178.20 is (180 &minus; 18) &times; 1.10. The tests expect the 8% results, so they fail when the rate changes.</p>
+
+  <h3 class="sub" id="sA-3">A.2&nbsp;&nbsp;Drills 3 and 4</h3>
+:::cs Tests/BankAccountTests.cs
+[Fact]
+public void Withdraw_Negative_Throws()
+{
+    var account = new BankAccount("Ada", 100m);
+    Assert.Throws<ArgumentOutOfRangeException>(() => account.Withdraw(-50m));
+}
+
+[Fact]
+public void TransferTo_MovesMoney()
+{
+    var source = new BankAccount("Ada", 100m);
+    var target = new BankAccount("Grace");
+
+    source.TransferTo(target, 40m);
+
+    Assert.Equal(60m, source.Balance);
+    Assert.Equal(40m, target.Balance);
+}
+:::
+:::cs Tutorial/Ch08Classes.cs
+public void Withdraw(decimal amount)
+{
+    if (amount <= 0)
+    {
+        throw new ArgumentOutOfRangeException(
+            nameof(amount), "Withdrawal must be positive.");
+    }
+    if (amount > _balance)
+    {
+        // ... unchanged ...
+    }
+    _balance -= amount;
+}
+
+public void TransferTo(BankAccount other, decimal amount)
+{
+    Withdraw(amount);          // throws before any money moves
+    other.Deposit(amount);
+}
+:::
+  <p>Withdrawing first matters: if the balance is too low, <code>Withdraw</code> throws and
+  <code>other</code> is never credited.</p>
+
+  <h3 class="sub" id="sA-5">A.3&nbsp;&nbsp;Drill 5</h3>
+:::cs Tutorial/Ch09Interfaces.cs
+public class Triangle : Shape
+{
+    public double BaseLength { get; }
+    public double Height { get; }
+
+    public Triangle(double baseLength, double height)
+    {
+        BaseLength = baseLength;
+        Height = height;
+    }
+
+    public override string Name => "Triangle";
+    public override double Area() => 0.5 * BaseLength * Height;
+}
+
+// in Run():
+var shapes = new List<Shape>
+{
+    new Circle(1), new Rectangle(2, 3), new Square(2), new Triangle(3, 4),
+};
+:::
+
+  <h3 class="sub" id="sA-6">A.4&nbsp;&nbsp;Drill 6</h3>
+:::cs Tutorial/Ch10Linq.cs
+var topByDept = Staff
+    .GroupBy(e => e.Dept)
+    .Select(g => g.OrderByDescending(e => e.Salary).First());
+foreach (var top in topByDept)
+{
+    Console.WriteLine($"Top in {top.Dept}: {top.Name}");
+}
+:::
+  <p><code>g.MaxBy(e =&gt; e.Salary)</code> also works. It is typed as possibly null, so the compiler adds a
+  nullable warning unless you write <code>g.MaxBy(e =&gt; e.Salary)!</code>.</p>
+
+  <h3 class="sub" id="sA-7">A.5&nbsp;&nbsp;Drill 7</h3>
+:::cs Tutorial/Orders/Discounts.cs
+// 5% off for customers on the loyalty list.
+public class LoyaltyDiscount : IDiscountPolicy
+{
+    private readonly HashSet<string> _members;
+
+    public LoyaltyDiscount(IEnumerable<string> members)
+    {
+        _members = new HashSet<string>(members);
+    }
+
+    public decimal DiscountFor(Order order)
+    {
+        if (!_members.Contains(order.Customer))
+        {
+            return 0m;
+        }
+        return Math.Round(order.Subtotal * 0.05m, 2);
+    }
+}
+:::
+  <p>The one-sentence answer: <code>OrderService</code> depends on the <code>IDiscountPolicy</code> interface,
+  not on any particular rule, so any class implementing that interface can be passed in without changing it.</p>
+
+  <h3 class="sub" id="sA-8">A.6&nbsp;&nbsp;Drill 8</h3>
+:::cs Tutorial.Api/Program.cs
+app.MapPost("/stock/{sku}/{quantity:int}",
+    (string sku, int quantity, Inventory inventory) =>
+{
+    inventory.Restock(sku, quantity);
+    return Results.Ok(new { sku, inStock = inventory.StockOf(sku) });
+});
+:::
+  <p><code>{quantity:int}</code> is a route constraint: the URL matches only if that part is a whole number,
+  and ASP.NET converts it to <code>int</code>.</p>
+</section>
+
+</body>
+</html>
