@@ -1,5 +1,5 @@
-project_name: c.tutorial
-repo_name: xmandeng/c.tutorial
+project_name: c-sharp.tutorial
+repo_name: xmandeng/c-sharp.tutorial
 jira_url: https://mandeng.atlassian.net
 epic_manager: true
 enable_langsmith: true

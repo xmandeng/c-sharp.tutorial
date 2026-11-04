@@ -1,4 +1,4 @@
-# c.tutorial
+# c-sharp.tutorial
 
 C# study material for a Python developer: a .NET 10 solution plus a textbook PDF generated from it.
 The reader is new to C#. Favour plain, conventional C# over clever or newest-syntax code.
