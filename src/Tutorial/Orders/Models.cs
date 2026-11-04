@@ -31,22 +31,30 @@ public class Order
         if (quantity <= 0)
         {
             throw new ArgumentOutOfRangeException(
-                nameof(quantity), "Quantity must be positive.");
+                nameof(quantity),
+                "Quantity must be positive."
+            );
         }
         Lines.Add(new OrderLine(product, quantity));
     }
 }
 
 // What checkout returns.
-public record Receipt(string OrderId, decimal Subtotal,
-                      decimal Discount, decimal Tax, decimal Total);
+public record Receipt(
+    string OrderId,
+    decimal Subtotal,
+    decimal Discount,
+    decimal Tax,
+    decimal Total
+);
 
 // Raised when an order cannot be completed.
 public class OrderException : Exception
 {
     public string OrderId { get; }
 
-    public OrderException(string orderId, string message) : base(message)
+    public OrderException(string orderId, string message)
+        : base(message)
     {
         OrderId = orderId;
     }

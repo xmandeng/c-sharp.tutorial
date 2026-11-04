@@ -48,8 +48,11 @@ public class OrderService
             int available = _inventory.StockOf(line.Product.Sku);
             if (available < line.Quantity)
             {
-                throw new OrderException(order.Id, $"Only {available} of " +
-                    $"{line.Product.Name} in stock, {line.Quantity} requested.");
+                string name = line.Product.Name;
+                string message =
+                    $"Only {available} of {name} in stock, "
+                    + $"{line.Quantity} requested.";
+                throw new OrderException(order.Id, message);
             }
         }
 

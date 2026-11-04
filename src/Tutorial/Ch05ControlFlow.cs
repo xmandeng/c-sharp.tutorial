@@ -11,7 +11,7 @@ public static class Ch05ControlFlow
         {
             Console.WriteLine("A");
         }
-        else if (score >= 80)   // Python: elif
+        else if (score >= 80) // Python: elif
         {
             Console.WriteLine("B");
         }
@@ -33,7 +33,7 @@ public static class Ch05ControlFlow
             >= 90 => "A",
             >= 80 => "B",
             >= 70 => "C",
-            _ => "F",           // _ = anything else
+            _ => "F", // _ = anything else
         };
         Console.WriteLine($"grade {grade}");
 
@@ -59,7 +59,7 @@ public static class Ch05ControlFlow
         int n = 0;
         while (n < 3)
         {
-            n++;                // same as n += 1
+            n++; // same as n += 1
         }
         Console.WriteLine($"n = {n}");
     }

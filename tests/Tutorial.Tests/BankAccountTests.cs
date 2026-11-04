@@ -36,6 +36,8 @@ public class BankAccountTests
     public void Deposit_NonPositive_Throws(int amount)
     {
         var account = new BankAccount("Ada");
-        Assert.Throws<ArgumentOutOfRangeException>(() => account.Deposit(amount));
+        Assert.Throws<ArgumentOutOfRangeException>(() =>
+            account.Deposit(amount)
+        );
     }
 }

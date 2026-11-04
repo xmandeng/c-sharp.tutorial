@@ -15,3 +15,6 @@ __pycache__/
 # Claude Code: local secrets and worktrees
 .claude/settings.local.json
 .claude/worktrees/
+
+# Coverage output
+coverage-report/

@@ -7,7 +7,10 @@ The reader is new to C#. Favour plain, conventional C# over clever or newest-syn
 
 The SDK lives in `~/.dotnet`; prefix commands with `export PATH=$HOME/.dotnet:$PATH` if `dotnet` is missing.
 
-- Build: `dotnet build` (must stay at zero warnings)
+- Build: `dotnet build --warnaserror` (analyzers must stay at zero warnings)
+- Format: `dotnet csharpier format .` (80 columns; keeps book listings from wrapping)
+- Coverage: `scripts/coverage.sh`
+- Hooks: `pre-commit run --all-files` (add `--hook-stage pre-push` for build + test)
 - Test: `dotnet test`
 - Run chapters: `dotnet run --project src/Tutorial -- <n>`
 - Run API: `dotnet run --project src/Tutorial.Api --urls http://localhost:5239`

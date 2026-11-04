@@ -26,7 +26,7 @@ public class BankAccount
             throw new ArgumentException("Owner is required.", nameof(owner));
         }
         Owner = owner;
-        Id = $"ACC-{_nextId++:D4}";
+        Id = NextId();
         _balance = openingBalance;
     }
 
@@ -35,7 +35,9 @@ public class BankAccount
         if (amount <= 0)
         {
             throw new ArgumentOutOfRangeException(
-                nameof(amount), "Deposit must be positive.");
+                nameof(amount),
+                "Deposit must be positive."
+            );
         }
         _balance += amount;
     }
@@ -45,10 +47,14 @@ public class BankAccount
         if (amount > _balance)
         {
             throw new InvalidOperationException(
-                $"Insufficient funds: balance {_balance}, requested {amount}.");
+                $"Insufficient funds: balance {_balance}, requested {amount}."
+            );
         }
         _balance -= amount;
     }
+
+    // A static method may update static fields; ACC-0001, ACC-0002, ...
+    private static string NextId() => $"ACC-{_nextId++:D4}";
 
     // Python: __str__
     public override string ToString() => $"{Id} {Owner}: {Balance:0.00}";
@@ -68,10 +74,10 @@ public static class Ch08Classes
 {
     public static void Run()
     {
-        var account = new BankAccount("Ada", 100m);   // "new" creates an object
+        var account = new BankAccount("Ada", 100m); // "new" creates an object
         account.Deposit(50m);
         account.Withdraw(30m);
-        Console.WriteLine(account);                   // calls ToString()
+        Console.WriteLine(account); // calls ToString()
         // account.Balance = 1_000_000m;              // compile error: no setter
 
         try
@@ -85,18 +91,20 @@ public static class Ch08Classes
 
         var p1 = new Point(1, 2);
         var p2 = new Point(1, 2);
-        Console.WriteLine(p1 == p2);          // True: records compare by value
-        Console.WriteLine(p1);                // Point { X = 1, Y = 2 }
-        var moved = p1 with { X = 10 };       // copy with one field changed
+        Console.WriteLine(p1 == p2); // True: records compare by value
+        Console.WriteLine(p1); // Point { X = 1, Y = 2 }
+        var moved = p1 with { X = 10 }; // copy with one field changed
         Console.WriteLine(moved);
 
         var g1 = new BankAccount("Grace");
         var g2 = new BankAccount("Grace");
-        Console.WriteLine(g1 == g2);          // False: classes compare by identity
+        Console.WriteLine(g1 == g2); // False: classes compare by identity
 
         var t1 = new Temperature { Celsius = 20 };
-        var t2 = t1;                          // struct: a full copy
+        var t2 = t1; // struct: a full copy
         t2.Celsius = 100;
-        Console.WriteLine($"t1 {t1.Celsius}C = {t1.Fahrenheit}F; t2 {t2.Celsius}C");
+        Console.WriteLine(
+            $"t1 {t1.Celsius}C = {t1.Fahrenheit}F; t2 {t2.Celsius}C"
+        );
     }
 }

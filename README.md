@@ -20,7 +20,7 @@ export PATH="$HOME/.dotnet:$PATH"          # add this line to ~/.bashrc too
 
 # 2. Build, test, run
 dotnet build                               # compile everything
-dotnet test                                # 8 unit tests
+dotnet test                                # 12 tests (unit, mock, API)
 dotnet run --project src/Tutorial          # run every chapter
 dotnet run --project src/Tutorial -- 6     # run the demo for book chapter 6
 ```
@@ -75,6 +75,29 @@ curl localhost:5239/stock/MN-03
 curl -X POST localhost:5239/orders -H 'Content-Type: application/json' \
      -d '{"customer":"Ada","lines":[{"sku":"MN-03","quantity":1}]}'
 ```
+
+## Code quality tools
+
+| Job | Python | This repo |
+|---|---|---|
+| Format | ruff format / Black | **CSharpier**: `dotnet csharpier format .` (VS Code formats on save) |
+| Lint | ruff check | **.NET analyzers** + **SonarAnalyzer**, run by `dotnet build`; rules in `.editorconfig` |
+| Unit tests | pytest | **xUnit v3**: `dotnet test` |
+| Mocks | unittest.mock | **Moq** |
+| API tests | FastAPI TestClient | **WebApplicationFactory** (`Microsoft.AspNetCore.Mvc.Testing`) |
+| Coverage | pytest-cov | **Microsoft Code Coverage** + **ReportGenerator**: `scripts/coverage.sh` |
+| Pinned versions | uv.lock | `Directory.Packages.props` + `packages.lock.json` |
+| Git hooks | pre-commit | **pre-commit**: format on commit; build (warnings as errors) and test on push |
+
+One-time setup after cloning:
+
+```bash
+dotnet tool restore        # installs CSharpier and ReportGenerator (pinned in dotnet-tools.json)
+pre-commit install         # needs pre-commit: uv tool install pre-commit
+```
+
+CI runs the same checks: formatting, build with warnings as errors, tests with a coverage summary,
+and every chapter demo.
 
 ## Debugging in VS Code
 

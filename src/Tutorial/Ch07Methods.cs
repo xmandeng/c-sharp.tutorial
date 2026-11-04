@@ -16,8 +16,8 @@ public static class Ch07Methods
     public static int Square(int x) => x * x;
 
     // Optional parameter with a default, as in Python
-    public static string Greet(string name, string greeting = "Hello")
-        => $"{greeting}, {name}!";
+    public static string Greet(string name, string greeting = "Hello") =>
+        $"{greeting}, {name}!";
 
     // out parameter: hand back a second value
     public static bool TryDivide(int a, int b, out int result)
@@ -32,8 +32,8 @@ public static class Ch07Methods
     }
 
     // Or return a tuple, as Python would
-    public static (int Min, int Max) MinMax(List<int> values)
-        => (values.Min(), values.Max());
+    public static (int Min, int Max) MinMax(List<int> values) =>
+        (values.Min(), values.Max());
 
     // params: any number of arguments (Python: *args)
     public static int Sum(params int[] numbers)
@@ -47,33 +47,33 @@ public static class Ch07Methods
     }
 
     // ref: the method can change the caller's variable
-    public static void Double(ref int x) => x *= 2;
+    public static void DoubleInPlace(ref int x) => x *= 2;
 
     public static void Run()
     {
-        Console.WriteLine(Add(2, 3));           // int version
-        Console.WriteLine(Add(2.5, 0.25));      // double version
+        Console.WriteLine(Add(2, 3)); // int version
+        Console.WriteLine(Add(2.5, 0.25)); // double version
         Console.WriteLine(Square(4));
         Console.WriteLine(Greet("Ada"));
-        Console.WriteLine(Greet("Ada", greeting: "Welcome"));   // named argument
+        Console.WriteLine(Greet("Ada", greeting: "Welcome")); // named argument
 
         if (TryDivide(10, 3, out int quotient))
         {
             Console.WriteLine($"10 / 3 = {quotient}");
         }
 
-        var (lo, hi) = MinMax(new List<int> { 4, 1, 9 });       // unpack a tuple
+        var (lo, hi) = MinMax(new List<int> { 4, 1, 9 }); // unpack a tuple
         Console.WriteLine($"min {lo}, max {hi}");
         Console.WriteLine(Sum(1, 2, 3, 4));
 
         int value = 5;
-        Double(ref value);
+        DoubleInPlace(ref value);
         Console.WriteLine($"value is now {value}");
 
         // Lambdas. Func<int, int>: takes an int, returns an int.
         // Action<string>: takes a string, returns nothing.
-        Func<int, int> triple = x => x * 3;     // Python: lambda x: x * 3
-        Action<string> shout = s => Console.WriteLine(s.ToUpper());
+        Func<int, int> triple = x => x * 3; // Python: lambda x: x * 3
+        Action<string> shout = s => Console.WriteLine(s.ToUpperInvariant());
         Console.WriteLine(triple(5));
         shout("done");
     }

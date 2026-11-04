@@ -25,6 +25,19 @@
             "args": ["test", "${workspaceFolder}/CSharpTutorial.slnx"],
             "problemMatcher": "$msCompile",
             "group": "test"
+        },
+        {
+            "label": "coverage",
+            "type": "shell",
+            "command": "${workspaceFolder}/scripts/coverage.sh",
+            "problemMatcher": []
+        },
+        {
+            "label": "format",
+            "type": "process",
+            "command": "dotnet",
+            "args": ["csharpier", "format", "."],
+            "problemMatcher": []
         }
     ]
 }

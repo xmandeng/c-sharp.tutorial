@@ -71,7 +71,7 @@ ol.tight li, ul.tight li { margin-bottom: 0.08cm; }
   explain the core ideas in the right vocabulary. The goal is not to become a
   C# developer overnight.</p>
   <p>Every C# listing labelled with a file path is copied from the companion
-  project, which builds without warnings, and all 8 of its tests pass. Program output shown
+  project, which builds with no analyzer warnings, passes the formatter check, and passes all 12 of its tests. Program output shown
   in the book is the real output of <code>dotnet run</code>.</p>
 
   <h3 class="sub">If You Have Two Hours</h3>
@@ -257,7 +257,10 @@ ol.tight li, ul.tight li { margin-bottom: 0.08cm; }
       <tr><td>Run tests</td><td class="c">pytest</td><td class="c">dotnet test</td></tr>
       <tr><td>Add a package</td><td class="c">uv add requests</td><td class="c">dotnet add package Serilog</td></tr>
       <tr><td>New project</td><td class="c">uv init</td><td class="c">dotnet new console -o MyApp</td></tr>
-      <tr><td>Format code</td><td class="c">ruff format</td><td class="c">dotnet format</td></tr>
+      <tr><td>Format code</td><td class="c">ruff format</td><td class="c">dotnet csharpier format .</td></tr>
+      <tr><td>Lint code</td><td class="c">ruff check</td><td class="c">dotnet build</td></tr>
+      <tr><td>Coverage report</td><td class="c">pytest --cov</td><td class="c">scripts/coverage.sh</td></tr>
+      <tr><td>Install dev tools</td><td class="c">uv sync</td><td class="c">dotnet tool restore</td></tr>
       <tr><td>Virtual env</td><td class="c">.venv</td><td>None needed. Packages are per project.</td></tr>
     </tbody>
   </table>
@@ -288,7 +291,8 @@ ol.tight li, ul.tight li { margin-bottom: 0.08cm; }
     (section 4.5).</li>
   </ul>
   <p>A test project adds <code>&lt;PackageReference&gt;</code> lines for xUnit, the same way
-  <code>pyproject.toml</code> lists dependencies.</p>
+  <code>pyproject.toml</code> lists dependencies. Section 2.5 covers the files that hold settings and package
+  versions shared by every project.</p>
 
   <h3 class="sub" id="s2-4">2.4&nbsp;&nbsp;Program.cs Walkthrough</h3>
   <p><code>Program.cs</code> reads the command line and calls each chapter's <code>Run</code>
@@ -330,6 +334,52 @@ foreach (int chapter in toRun)
     <li>C# does not let one <code>case</code> fall through into the next, so each one ends in
     <code>break</code> (or <code>return</code> or <code>throw</code>).</li>
   </ul>
+
+  <h3 class="sub" id="s2-5">2.5&nbsp;&nbsp;Code Quality Tools</h3>
+  <p>The project uses the standard .NET tools for formatting, linting, testing and coverage. Each one has a
+  Python counterpart you already know.</p>
+  <table class="data">
+    <thead><tr><th style="width:18%">Job</th><th style="width:24%">Python</th><th>C# tool</th><th style="width:30%">Configured in</th></tr></thead>
+    <tbody>
+      <tr><td>Format</td><td>ruff format, Black</td><td>CSharpier</td><td class="c">.csharpierrc.yaml</td></tr>
+      <tr><td>Lint</td><td>ruff check</td><td>.NET analyzers, SonarAnalyzer</td><td class="c">.editorconfig, Directory.Build.props</td></tr>
+      <tr><td>Unit tests</td><td>pytest</td><td>xUnit v3</td><td class="c">tests/Tutorial.Tests</td></tr>
+      <tr><td>Mocks</td><td>unittest.mock</td><td>Moq</td><td>section 13.7</td></tr>
+      <tr><td>API tests</td><td>FastAPI TestClient</td><td>WebApplicationFactory</td><td>section 14.4</td></tr>
+      <tr><td>Coverage</td><td>pytest-cov</td><td>Microsoft Code Coverage, ReportGenerator</td><td class="c">scripts/coverage.sh</td></tr>
+      <tr><td>Pinned versions</td><td>uv.lock</td><td>Central package management, lock files</td><td class="c">Directory.Packages.props</td></tr>
+      <tr><td>Git hooks</td><td>pre-commit</td><td>pre-commit</td><td class="c">.pre-commit-config.yaml</td></tr>
+    </tbody>
+  </table>
+
+  <p><strong>Formatting.</strong> CSharpier changes only layout (line breaks, indentation, spacing), the way
+  Black does. Run <code>dotnet csharpier format .</code>, or save the file in VS Code, which formats C# on
+  save. The line width is 80 characters, set in <code>.csharpierrc.yaml</code>.</p>
+
+  <p><strong>Linting.</strong> C# linting runs inside the compiler. <strong>Analyzers</strong> are compiler
+  plug-ins that run during <code>dotnet build</code> and report each problem as a warning with a code. Codes
+  starting <code>CA</code> are Microsoft's code-analysis rules, <code>IDE</code> codes are style rules, and
+  <code>S</code> codes come from SonarAnalyzer. <code>.editorconfig</code> sets how serious each rule is:</p>
+:::out .editorconfig (excerpt)
+# Test method names use the xUnit convention Method_Scenario_Expected.
+[tests/**.cs]
+dotnet_diagnostic.CA1707.severity = none
+:::
+  <p><code>dotnet build --warnaserror</code> turns every warning into an error. The pre-push hook and CI build
+  this way, so code with an analyzer warning cannot reach <code>main</code>.</p>
+
+  <p><strong>Shared settings.</strong> Two files at the repo root apply to every project.
+  <code>Directory.Build.props</code> switches on the analyzers and lock files. <code>Directory.Packages.props</code>
+  lists every NuGet package version once, so <code>.csproj</code> files name packages without versions. This is
+  <strong>central package management</strong>. <code>dotnet add package</code> updates it for you.</p>
+
+  <p><strong>Developer tools.</strong> <code>dotnet-tools.json</code> pins CSharpier and ReportGenerator to this
+  repo. <code>dotnet tool restore</code> installs them, and you run them as <code>dotnet csharpier</code> and
+  <code>dotnet reportgenerator</code>.</p>
+
+  <p><strong>Hooks and CI.</strong> Run <code>pre-commit install</code> once after cloning. Each commit then
+  formats the staged C# files, and each push builds with warnings as errors and runs the tests. GitHub Actions
+  runs the same checks on every push and adds a coverage summary to the run page.</p>
 </section>
 
 <!-- ===================== 3 ===================== -->
@@ -553,7 +603,7 @@ listA.Count = 3
   </ul>
 
   <h3 class="sub" id="s5-2">5.2&nbsp;&nbsp;Loops</h3>
-:::file src/Tutorial/Ch05ControlFlow.cs :: for (int i = 0 ..> Console.WriteLine($"n = 
+:::file src/Tutorial/Ch05ControlFlow.cs :: for (int i = 0 ..> Console.WriteLine($"n =
   <table class="data">
     <thead><tr><th>Python</th><th>C#</th></tr></thead>
     <tbody>
@@ -666,7 +716,7 @@ int score = FirstItem(new List<int> { 90, 72 });                // T is int
   class attributes.</p>
 
   <h3 class="sub" id="s7-3">7.3&nbsp;&nbsp;Parameters</h3>
-:::file src/Tutorial/Ch07Methods.cs :: public static string Greet ..> public static void Double
+:::file src/Tutorial/Ch07Methods.cs :: public static string Greet ..> public static void DoubleInPlace
   <p>The calls, from <code>Run</code>:</p>
 :::file src/Tutorial/Ch07Methods.cs :: Console.WriteLine(Greet("Ada"));  ..> Console.WriteLine($"value is now
   <ul class="tight">
@@ -787,7 +837,7 @@ False
   its data. Structs suit small values such as coordinates or temperatures.</p>
   <p><code>new Temperature { Celsius = 20 }</code> is an <strong>object initializer</strong>: it creates the
   object, then sets each listed property. It works for classes too.</p>
-:::file src/Tutorial/Ch08Classes.cs :: public struct Temperature :: var t1 ..> Console.WriteLine($"t1
+:::file src/Tutorial/Ch08Classes.cs :: public struct Temperature :: var t1 ..> $"t1 {t1.Celsius}
 :::out
 t1 20C = 68F; t2 100C
 :::
@@ -958,7 +1008,7 @@ Most senior: Grace
   <p><code>e =&gt; e.Salary &gt; 100_000m</code> is the lambda from section 7.4: for each employee
   <code>e</code>, keep it if the salary is over 100,000. <code>.ToList()</code> turns the result into a
   <code>List</code>.</p>
-:::file src/Tutorial/Ch10Linq.cs :: var byDept = Staff ..> {d.Dept,-12}
+:::file src/Tutorial/Ch10Linq.cs :: var byDept = Staff ..> {d.Dept, -12}
 :::out
 Engineering  3 people, avg 117667
 Finance      1 people, avg 105000
@@ -969,7 +1019,7 @@ Sales        2 people, avg 89000
     <code>Key</code> (the department) and is itself a sequence of employees.</li>
     <li><code>new { Dept = ..., Count = ... }</code> creates an <strong>anonymous type</strong>: an object
     with those properties and no declared class. It is like building a small dict, but typed.</li>
-    <li><code>{d.Dept,-12}</code> pads the text to 12 characters, left-aligned. Python: <code>{d.dept:&lt;12}</code>.</li>
+    <li><code>{d.Dept, -12}</code> pads the text to 12 characters, left-aligned. Python: <code>{d.dept:&lt;12}</code>.</li>
   </ul>
 
   <h3 class="sub" id="s10-3">10.3&nbsp;&nbsp;Deferred Execution</h3>
@@ -990,7 +1040,7 @@ Sales        2 people, avg 89000
   <h3 class="sub" id="s10-4">10.4&nbsp;&nbsp;Query Syntax</h3>
   <p>LINQ has a second, SQL-like syntax. The compiler turns it into the same method calls.
   Method syntax is more common in modern code; read both.</p>
-:::file src/Tutorial/Ch10Linq.cs :: var engineers = from
+:::file src/Tutorial/Ch10Linq.cs :: var engineers =
 
   <h3 class="sub" id="s10-5">10.5&nbsp;&nbsp;Extension Methods</h3>
   <p><code>Where</code> and <code>Select</code> are not defined on <code>List</code>. They are
@@ -1048,7 +1098,7 @@ out of range: parameter 'text'
   <p>A <code>using</code> block guarantees that cleanup runs when the block ends, even if an exception is
   thrown. It is Python's <code>with</code> statement. The cleanup method is <code>Dispose()</code>, from the
   <code>IDisposable</code> interface, which plays the role of <code>__exit__</code>.</p>
-:::file src/Tutorial/Ch11Exceptions.cs :: using (var log = :: public class TempLog
+:::file src/Tutorial/Ch11Exceptions.cs :: using (var log = :: public sealed class TempLog
 :::out
 open demo
 [demo] inside the using block
@@ -1225,6 +1275,7 @@ Mice left: 8
       <tr><td class="c">assert actual == expected</td><td class="c">Assert.Equal(expected, actual)</td></tr>
       <tr><td class="c">with pytest.raises(E):</td><td class="c">Assert.Throws&lt;E&gt;(() =&gt; ...)</td></tr>
       <tr><td class="c">pytest</td><td class="c">dotnet test</td></tr>
+      <tr><td class="c">unittest.mock.Mock</td><td class="c">new Mock&lt;IThing&gt;() (Moq)</td></tr>
     </tbody>
   </table>
   <p>Text in square brackets, such as <code>[Fact]</code>, is an <strong>attribute</strong>: a label attached
@@ -1232,6 +1283,21 @@ Mice left: 8
   <code>[Fact]</code>. Attributes look like Python decorators but only attach information; they do not wrap
   the method.</p>
   <p>Note the argument order: <code>Assert.Equal</code> takes the expected value first.</p>
+
+  <h3 class="sub" id="s13-7">13.7&nbsp;&nbsp;Mocks with Moq</h3>
+  <p>A <strong>mock</strong> is a fake object, built by a library at run time, that stands in for a real
+  dependency in a test. <strong>Moq</strong> is the most widely used .NET mocking library. It builds the fake
+  from an interface, which is one more reason <code>OrderService</code> takes an <code>IDiscountPolicy</code>
+  rather than a concrete class.</p>
+:::file tests/Tutorial.Tests/OrderServiceMockTests.cs :: public void Checkout_UsesTheDiscountFromThePolicy
+  <ul class="tight">
+    <li><code>new Mock&lt;IDiscountPolicy&gt;()</code> creates the fake. <code>policy.Object</code> is the
+    <code>IDiscountPolicy</code> to pass in.</li>
+    <li><code>Setup(...).Returns(10.00m)</code> says what the fake returns. <code>It.IsAny&lt;Order&gt;()</code>
+    matches any argument.</li>
+    <li><code>Verify(..., Times.Once())</code> fails the test unless the method was called exactly once with
+    that order.</li>
+  </ul>
 </section>
 
 <!-- ===================== 14 ===================== -->
@@ -1260,7 +1326,9 @@ Mice left: 8
   </table>
 
   <h3 class="sub" id="s14-2">14.2&nbsp;&nbsp;Endpoints</h3>
-:::file src/Tutorial.Api/Program.cs :: // 2. Map URLs ..> return Results.BadRequest :: public record LineRequest ..> public record OrderRequest
+:::file src/Tutorial.Api/Program.cs :: // 2. Map URLs ..> return Results.BadRequest
+  <p>The request records live in their own file:</p>
+:::file src/Tutorial.Api/Contracts.cs :: namespace Tutorial.Api; :: // The JSON body ..> public record OrderRequest
   <ul class="tight">
     <li><code>MapGet</code> and <code>MapPost</code> connect an HTTP method and URL to a lambda. FastAPI writes
     the same thing as <code>@app.get("/products")</code>.</li>
@@ -1295,6 +1363,24 @@ curl -X POST localhost:5239/orders -H 'Content-Type: application/json' \
   <p>Larger applications use <strong>controllers</strong> instead of lambdas: classes whose methods are marked
   with attributes such as <code>[HttpGet("products")]</code>. The ideas are the same. Data storage usually goes
   through <strong>Entity Framework Core</strong> (EF Core), an ORM comparable to SQLAlchemy or the Django ORM.</p>
+
+  <h3 class="sub" id="s14-4">14.4&nbsp;&nbsp;Integration Tests</h3>
+  <p>An <strong>integration test</strong> runs several parts of the program together. For a web API, that
+  means sending real HTTP requests to the real endpoints. <code>WebApplicationFactory</code>, from the
+  <code>Microsoft.AspNetCore.Mvc.Testing</code> package, starts the whole API in memory, with no network port,
+  and returns an <code>HttpClient</code> connected to it. FastAPI's <code>TestClient</code> does the same job.</p>
+:::file tests/Tutorial.Tests/ApiTests.cs :: public class ApiTests ..= TestContext.Current.CancellationToken;
+  <p>One of the three tests:</p>
+:::file tests/Tutorial.Tests/ApiTests.cs :: public async Task PostOrder_ValidOrder_ReturnsReceipt
+  <ul class="tight">
+    <li><code>IClassFixture&lt;WebApplicationFactory&lt;Program&gt;&gt;</code> tells xUnit to create one factory
+    for the whole class and pass it to the constructor. Starting the API once per class keeps the tests fast.</li>
+    <li><code>Program</code> is the API's hidden entry class from its top-level statements.</li>
+    <li><code>PostAsJsonAsync</code> converts the record to JSON and sends it; <code>ReadFromJsonAsync</code>
+    converts the reply back into a <code>Receipt</code>.</li>
+    <li><code>TestContext.Current.CancellationToken</code> (the <code>Token</code> property) lets xUnit cancel the
+    request if the test run is stopped. xUnit's own analyzer asks for it on every call that accepts one.</li>
+  </ul>
 </section>
 
 <!-- ===================== 15 ===================== -->
@@ -1349,28 +1435,28 @@ curl -X POST localhost:5239/orders -H 'Content-Type: application/json' \
   <p>This session pauses inside <code>OrderService.Checkout</code> and follows the discount calculation into
   <code>BulkDiscount</code>.</p>
   <ol class="tight">
-    <li>Open <code>src/Tutorial/Orders/OrderService.cs</code>. Click in the margin left of line 62,
+    <li>Open <code>src/Tutorial/Orders/OrderService.cs</code>. Click in the margin left of line 65,
     <code>decimal discount = _discounts.DiscountFor(order);</code>. A red dot appears: a
     <strong>breakpoint</strong>. F9 toggles one on the current line.</li>
     <li>Open the Run and Debug view (Ctrl+Shift+D). Choose <em>Tutorial: one chapter</em> in the drop-down
     and press F5. Press Enter to accept chapter 13.</li>
-    <li>The program builds, starts, and pauses on line 62, which is highlighted yellow. The highlighted line
+    <li>The program builds, starts, and pauses on line 65, which is highlighted yellow. The highlighted line
     has <em>not</em> run yet. In the Variables panel, <code>subtotal</code> is 50.00: this is ORD-1. Expand
     <code>order</code>, then <code>Lines</code>, then <code>[0]</code> to see the mouse line.</li>
     <li>Press F11 (step into). The debugger enters <code>BulkDiscount.DiscountFor</code>, because the
     <code>IDiscountPolicy</code> passed in is a <code>BulkDiscount</code>. This is polymorphism (section 9.3)
     happening in front of you. The Call Stack panel lists <code>BulkDiscount.DiscountFor</code>, then
     <code>OrderService.Checkout</code>, <code>Ch13Orders.Run</code> and <code>Program.&lt;Main&gt;$</code>.</li>
-    <li>Press Shift+F11 (step out) to return to <code>Checkout</code>, then F10 (step over) to run line 63.
+    <li>Press Shift+F11 (step out) to return to <code>Checkout</code>, then F10 (step over) to run line 66.
     Hover over <code>tax</code>: it shows 4.00.</li>
-    <li>Press F5 (continue). The program pauses again on line 62 for ORD-2, where <code>subtotal</code> is
-    225.00. Press F5 again. ORD-3 fails its stock check before line 62, so the program runs to the end.</li>
+    <li>Press F5 (continue). The program pauses again on line 65 for ORD-2, where <code>subtotal</code> is
+    225.00. Press F5 again. ORD-3 fails its stock check before line 65, so the program runs to the end.</li>
   </ol>
   <table class="data">
     <thead><tr><th style="width:20%">Key</th><th>Action</th><th style="width:26%">pdb command</th></tr></thead>
     <tbody>
       <tr><td class="c">F5</td><td>Start, or continue to the next breakpoint</td><td class="c">c</td></tr>
-      <tr><td class="c">F9</td><td>Toggle a breakpoint on the current line</td><td class="c">b 62</td></tr>
+      <tr><td class="c">F9</td><td>Toggle a breakpoint on the current line</td><td class="c">b 65</td></tr>
       <tr><td class="c">F10</td><td>Step over: run this line, pause on the next</td><td class="c">n</td></tr>
       <tr><td class="c">F11</td><td>Step into the method called on this line</td><td class="c">s</td></tr>
       <tr><td class="c">Shift+F11</td><td>Step out: finish this method, pause in the caller</td><td class="c">r</td></tr>
@@ -1402,7 +1488,7 @@ curl -X POST localhost:5239/orders -H 'Content-Type: application/json' \
     <text x="14" y="248" font-size="10.5" font-weight="700" fill="#1f3756">BREAKPOINTS</text>
     <text x="22" y="264" font-size="10.5" fill="#1c1c1c">&#9744; All Exceptions</text>
     <text x="22" y="278" font-size="10.5" fill="#1c1c1c">&#9744; User-Unhandled Exceptions</text>
-    <text x="22" y="292" font-size="10.5" fill="#1c1c1c">&#9745; OrderService.cs  62</text>
+    <text x="22" y="292" font-size="10.5" fill="#1c1c1c">&#9745; OrderService.cs  65</text>
     <!-- toolbar -->
     <rect x="300" y="12" width="232" height="24" rx="4" fill="#1f3756"/>
     <text x="316" y="28" font-size="10.5" font-weight="700" fill="#ffffff">F5</text>
@@ -1413,13 +1499,13 @@ curl -X POST localhost:5239/orders -H 'Content-Type: application/json' \
     <text x="484" y="28" font-size="10.5" font-weight="700" fill="#ffffff">&#8679;F5</text>
     <!-- editor -->
     <text x="212" y="62" font-size="10.5" font-weight="700" fill="#5b6470">OrderService.cs</text>
-    <text x="232" y="88" font-size="10.5" text-anchor="end" font-family="'Liberation Mono',monospace" fill="#8a96a3">61</text>
+    <text x="232" y="88" font-size="10.5" text-anchor="end" font-family="'Liberation Mono',monospace" fill="#8a96a3">64</text>
     <text x="244" y="88" font-size="10.5" font-family="'Liberation Mono',monospace" fill="#1c1c1c">decimal subtotal = order.Subtotal;</text>
     <rect x="238" y="94" width="372" height="18" fill="#fff4c2"/>
     <circle cx="214" cy="103" r="5" fill="#c0392b"/>
-    <text x="232" y="107" font-size="10.5" text-anchor="end" font-family="'Liberation Mono',monospace" fill="#8a96a3">62</text>
+    <text x="232" y="107" font-size="10.5" text-anchor="end" font-family="'Liberation Mono',monospace" fill="#8a96a3">65</text>
     <text x="244" y="107" font-size="10.5" font-family="'Liberation Mono',monospace" fill="#1c1c1c">decimal discount = _discounts.DiscountFor(order);</text>
-    <text x="232" y="126" font-size="10.5" text-anchor="end" font-family="'Liberation Mono',monospace" fill="#8a96a3">63</text>
+    <text x="232" y="126" font-size="10.5" text-anchor="end" font-family="'Liberation Mono',monospace" fill="#8a96a3">66</text>
     <text x="244" y="126" font-size="10.5" font-family="'Liberation Mono',monospace" fill="#1c1c1c">decimal tax = Math.Round(...);</text>
     <text x="244" y="160" font-size="11" fill="#c0392b">red dot = breakpoint</text>
     <text x="244" y="176" font-size="11" fill="#9a7a00">yellow line = next line to run</text>
@@ -1465,7 +1551,7 @@ curl -X POST localhost:5239/orders -H 'Content-Type: application/json' \
   Each test has a Run button and a Debug button. In the editor, an icon appears in the margin next to each
   <code>[Fact]</code>; right-click it and choose Debug Test.</p>
   <ol class="tight">
-    <li>Open <code>tests/Tutorial.Tests/OrderServiceTests.cs</code> and set a breakpoint on line 55,
+    <li>Open <code>tests/Tutorial.Tests/OrderServiceTests.cs</code> and set a breakpoint on line 58,
     <code>var ex = Assert.Throws&lt;OrderException&gt;(...)</code>.</li>
     <li>Debug <code>Checkout_NotEnoughStock_ThrowsAndLeavesStockAlone</code>.</li>
     <li>When it pauses, press F11 to step into <code>Checkout</code> and watch the stock check fail for the
@@ -1476,11 +1562,11 @@ curl -X POST localhost:5239/orders -H 'Content-Type: application/json' \
 
   <h3 class="sub" id="s15-7">15.7&nbsp;&nbsp;Debugging the Web API</h3>
   <ol class="tight">
-    <li>In <code>src/Tutorial.Api/Program.cs</code>, set a breakpoint on line 40, <code>var order = new Order(...)</code>.</li>
+    <li>In <code>src/Tutorial.Api/Program.cs</code>, set a breakpoint on line 51, <code>var order = new Order(...)</code>.</li>
     <li>Choose <em>Web API</em> and press F5. Wait for <code>Now listening on: http://localhost:5239</code>
     in the terminal.</li>
     <li>In a second terminal, send an order with the <code>curl -X POST</code> command from section 14.3.</li>
-    <li>VS Code pauses on line 40. In Variables, <code>request</code> already holds the JSON body, converted into an
+    <li>VS Code pauses on line 51. In Variables, <code>request</code> already holds the JSON body, converted into an
     <code>OrderRequest</code> record. <code>curl</code> waits until you press F5.</li>
   </ol>
 
@@ -1511,7 +1597,7 @@ Unhandled exception. System.Collections.Generic.KeyNotFoundException:
   <h2 class="section" id="s16"><span class="snum">16</span> Hands-on Drills</h2>
   <p>Each drill is a small change to the companion project, ordered from easiest to hardest. Run the
   stated command after each change. Solutions are in appendix A. Before starting, check that the project is
-  clean: <code>dotnet test</code> should report 8 passed.</p>
+  clean: <code>dotnet test</code> should report 12 tests, 0 failed.</p>
   <div class="note"><span class="lbl">Undo.</span> The project is a git repository. After a drill,
   <code>git checkout -- .</code> restores every file to its committed state. To keep your answers instead,
   work on a branch: <code>git switch -c drills</code>.</div>
@@ -1520,7 +1606,7 @@ Unhandled exception. System.Collections.Generic.KeyNotFoundException:
   <p>In <code>Orders/OrderService.cs</code>, change <code>TaxRate</code> from <code>0.08m</code> to <code>0.10m</code>.</p>
   <ul class="tight">
     <li>Predict the new totals for ORD-1 and ORD-2, then check with <code>dotnet run --project src/Tutorial -- 13</code>.</li>
-    <li>Run <code>dotnet test</code>. Two tests fail. Find the "Expected" and "Actual" lines in the output and
+    <li>Run <code>dotnet test</code>. Four tests fail. Find the "Expected" and "Actual" lines in the output and
     explain each number.</li>
     <li>Change the rate back.</li>
   </ul>
@@ -1571,8 +1657,9 @@ Top in Finance: Barbara
 
   <h3 class="sub" id="s16-7">16.7&nbsp;&nbsp;Drill 7: A New Discount Rule</h3>
   <p>In <code>Orders/Discounts.cs</code>, write <code>LoyaltyDiscount</code>, an <code>IDiscountPolicy</code>
-  that gives 5% off to customers whose names are in a set passed to its constructor. In <code>Ch13Orders.cs</code>,
-  pass <code>new LoyaltyDiscount(new[] { "Ada" })</code> instead of <code>new BulkDiscount()</code>.
+  that gives 5% off to customers whose names are passed to its constructor. Give the constructor a
+  <code>params string[] members</code> parameter (section 7.3). In <code>Ch13Orders.cs</code>,
+  pass <code>new LoyaltyDiscount("Ada")</code> instead of <code>new BulkDiscount()</code>.
   Do not change <code>OrderService</code>. Expected:</p>
 :::out
 ORD-1: subtotal 50.00 - discount 2.50 + tax 3.80 = 51.30
@@ -1583,7 +1670,7 @@ ORD-2: subtotal 225.00 - discount 0.00 + tax 18.00 = 243.00
 
   <h3 class="sub" id="s16-8">16.8&nbsp;&nbsp;Drill 8: A New Endpoint</h3>
   <p>In <code>src/Tutorial.Api/Program.cs</code>, add <code>POST /stock/{sku}/{quantity}</code>, which restocks
-  a product and returns the new stock level. Place it before <code>app.Run()</code>. Restart the server, then test it (a fresh server
+  a product and returns the new stock level. Place it before <code>await app.RunAsync();</code>. Restart the server, then test it (a fresh server
   holds 5 monitors):</p>
 :::out
 curl -X POST localhost:5239/stock/MN-03/10
@@ -1592,7 +1679,7 @@ curl -X POST localhost:5239/stock/MN-03/10
 
   <h3 class="sub" id="s16-9">16.9&nbsp;&nbsp;Drill 9: Use the Debugger</h3>
   <p>Without adding any code, find the discount and tax that ORD-2 receives. Set a conditional breakpoint
-  on line 63 of <code>OrderService.cs</code> with the condition <code>order.Id == "ORD-2"</code>. Run
+  on line 66 of <code>OrderService.cs</code> with the condition <code>order.Id == "ORD-2"</code>. Run
   <em>Tutorial: one chapter</em> with chapter 13. When it pauses, read <code>discount</code> in Variables
   (expected: 22.50), then press F10 and read <code>tax</code> (expected: 16.20).</p>
 </section>
@@ -1750,22 +1837,30 @@ curl -X POST localhost:5239/stock/MN-03/10
 <!-- ===================== A ===================== -->
 <section class="new-page">
   <h2 class="section" id="sA"><span class="snum">A</span> Drill Solutions</h2>
-  <p>Each solution below was applied to a copy of the project and built. With all of them in place, all 10 tests pass
+  <p>Each solution below was applied to a copy of the project and built. With all of them in place, the build has no analyzer warnings, all 14 tests pass,
   and the outputs match those stated in chapter 16.</p>
 
   <h3 class="sub" id="sA-1">A.1&nbsp;&nbsp;Drill 1</h3>
   <p>ORD-1: tax 5.00, total 55.00. ORD-2: tax 20.25, total 222.75. <code>dotnet test</code> reports:</p>
 :::out
-Failed Tutorial.Tests.OrderServiceTests.Checkout_LargeOrder_GetsBulkDiscount
-  Assert.Equal() Failure: Values differ
-  Expected: 174.96
-  Actual:   178.20
-Failed Tutorial.Tests.OrderServiceTests.Checkout_SmallOrder_AddsTaxOnly
+failed Tutorial.Tests.OrderServiceTests.Checkout_SmallOrder_AddsTaxOnly
   Assert.Equal() Failure: Values differ
   Expected: 4.00
   Actual:   5.00
+failed Tutorial.Tests.OrderServiceTests.Checkout_LargeOrder_GetsBulkDiscount
+  Assert.Equal() Failure: Values differ
+  Expected: 174.96
+  Actual:   178.20
+failed Tutorial.Tests.OrderServiceMockTests.Checkout_UsesTheDiscountFromThePolicy
+  Expected: 43.20
+  Actual:   44.00
+failed Tutorial.Tests.ApiTests.PostOrder_ValidOrder_ReturnsReceipt
+  Expected: 174.96
+  Actual:   178.20
+  total: 12
+  failed: 4
 :::
-  <p>178.20 is (180 &minus; 18) &times; 1.10. The tests expect the 8% results, so they fail when the rate changes.</p>
+  <p>178.20 is (180 &minus; 18) &times; 1.10, and 44.00 is (50 &minus; 10) &times; 1.10. The tests expect the 8% results, so they fail when the rate changes. Output abridged.</p>
 
   <h3 class="sub" id="sA-3">A.2&nbsp;&nbsp;Drills 3 and 4</h3>
 :::cs Tests/BankAccountTests.cs
@@ -1794,7 +1889,9 @@ public void Withdraw(decimal amount)
     if (amount <= 0)
     {
         throw new ArgumentOutOfRangeException(
-            nameof(amount), "Withdrawal must be positive.");
+            nameof(amount),
+            "Withdrawal must be positive."
+        );
     }
     if (amount > _balance)
     {
@@ -1805,7 +1902,7 @@ public void Withdraw(decimal amount)
 
 public void TransferTo(BankAccount other, decimal amount)
 {
-    Withdraw(amount);          // throws before any money moves
+    Withdraw(amount); // throws before any money moves
     other.Deposit(amount);
 }
 :::
@@ -1856,7 +1953,7 @@ public class LoyaltyDiscount : IDiscountPolicy
 {
     private readonly HashSet<string> _members;
 
-    public LoyaltyDiscount(IEnumerable<string> members)
+    public LoyaltyDiscount(params string[] members)
     {
         _members = new HashSet<string>(members);
     }
@@ -1876,12 +1973,14 @@ public class LoyaltyDiscount : IDiscountPolicy
 
   <h3 class="sub" id="sA-8">A.6&nbsp;&nbsp;Drill 8</h3>
 :::cs Tutorial.Api/Program.cs
-app.MapPost("/stock/{sku}/{quantity:int}",
+app.MapPost(
+    "/stock/{sku}/{quantity:int}",
     (string sku, int quantity, Inventory inventory) =>
-{
-    inventory.Restock(sku, quantity);
-    return Results.Ok(new { sku, inStock = inventory.StockOf(sku) });
-});
+    {
+        inventory.Restock(sku, quantity);
+        return Results.Ok(new { sku, inStock = inventory.StockOf(sku) });
+    }
+);
 :::
   <p><code>{quantity:int}</code> is a route constraint: the URL matches only if that part is a whole number,
   and ASP.NET converts it to <code>int</code>.</p>

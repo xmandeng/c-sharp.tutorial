@@ -9,13 +9,13 @@ public record Employee(string Name, string Dept, decimal Salary, int Years);
 // LINQ's Where, Select, OrderBy are all extension methods on IEnumerable<T>.
 public static class EmployeeExtensions
 {
-    public static decimal TotalSalary(this IEnumerable<Employee> staff)
-        => staff.Sum(e => e.Salary);
+    public static decimal TotalSalary(this IEnumerable<Employee> staff) =>
+        staff.Sum(e => e.Salary);
 }
 
 public static class Ch10Linq
 {
-    public static readonly List<Employee> Staff = new()
+    private static readonly List<Employee> Staff = new()
     {
         new("Ada", "Engineering", 120_000m, 5),
         new("Grace", "Engineering", 135_000m, 9),
@@ -44,9 +44,12 @@ public static class Ch10Linq
         decimal payroll = Staff.Sum(e => e.Salary);
         double avgYears = Staff.Average(e => e.Years);
         bool anyNewHires = Staff.Any(e => e.Years == 0);
-        Employee? firstInHr = Staff.FirstOrDefault(e => e.Dept == "HR");  // null if none
-        Console.WriteLine($"Payroll {payroll}, avg years {avgYears:F1}, " +
-                          $"new hires? {anyNewHires}, HR? {firstInHr?.Name ?? "none"}");
+        // FirstOrDefault returns null when nothing matches
+        Employee? firstInHr = Staff.FirstOrDefault(e => e.Dept == "HR");
+        Console.WriteLine(
+            $"Payroll {payroll}, avg years {avgYears:F1}, "
+                + $"new hires? {anyNewHires}, HR? {firstInHr?.Name ?? "none"}"
+        );
 
         // GroupBy, then shape each group into a new anonymous object
         var byDept = Staff
@@ -60,25 +63,28 @@ public static class Ch10Linq
             .OrderBy(x => x.Dept);
         foreach (var d in byDept)
         {
-            Console.WriteLine($"{d.Dept,-12} {d.Count} people, avg {d.Avg:0}");
+            Console.WriteLine($"{d.Dept, -12} {d.Count} people, avg {d.Avg:0}");
         }
 
         // Deferred execution: a query runs when you loop over it, and again
         // on every later loop. (Lazy like a Python generator, but reusable.)
         var numbers = new List<int> { 1, 2, 3 };
-        var evens = numbers.Where(n => n % 2 == 0);  // nothing runs yet
+        var evens = numbers.Where(n => n % 2 == 0); // nothing runs yet
         numbers.Add(4);
-        Console.WriteLine($"evens: {string.Join(",", evens)}");  // 2,4
+        Console.WriteLine($"evens: {string.Join(",", evens)}"); // 2,4
 
         // Query syntax: the same thing written SQL-style
-        var engineers = from e in Staff
-                        where e.Dept == "Engineering"
-                        orderby e.Salary descending
-                        select e.Name;
+        var engineers =
+            from e in Staff
+            where e.Dept == "Engineering"
+            orderby e.Salary descending
+            select e.Name;
         Console.WriteLine($"Engineers by pay: {string.Join(", ", engineers)}");
 
         // Calling the extension method defined above
-        decimal engPayroll = Staff.Where(e => e.Dept == "Engineering").TotalSalary();
+        decimal engPayroll = Staff
+            .Where(e => e.Dept == "Engineering")
+            .TotalSalary();
         Console.WriteLine($"Engineering payroll: {engPayroll}");
     }
 }

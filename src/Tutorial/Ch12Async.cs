@@ -8,7 +8,7 @@ public static class Ch12Async
     // async method returning Task<string> (Python: async def fetch(...) -> str)
     public static async Task<string> FetchAsync(string name, int delayMs)
     {
-        await Task.Delay(delayMs);            // Python: await asyncio.sleep(...)
+        await Task.Delay(delayMs); // Python: await asyncio.sleep(...)
         return $"{name} finished after {delayMs} ms";
     }
 
@@ -19,7 +19,7 @@ public static class Ch12Async
         // One after the other: about 600 ms in total
         string first = await FetchAsync("first", 300);
         string second = await FetchAsync("second", 300);
-        long ms = timer.ElapsedMilliseconds / 100 * 100;   // round down to 100s
+        long ms = timer.ElapsedMilliseconds / 100 * 100; // round down to 100s
         Console.WriteLine($"sequential took ~{ms} ms");
 
         timer.Restart();
@@ -29,7 +29,7 @@ public static class Ch12Async
         // (A Python coroutine does nothing until awaited.)
         Task<string> a = FetchAsync("A", 300);
         Task<string> b = FetchAsync("B", 300);
-        string[] results = await Task.WhenAll(a, b);   // Python: asyncio.gather
+        string[] results = await Task.WhenAll(a, b); // Python: asyncio.gather
         ms = timer.ElapsedMilliseconds / 100 * 100;
         Console.WriteLine($"concurrent took ~{ms} ms");
 

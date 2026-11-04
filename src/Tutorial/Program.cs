@@ -30,16 +30,38 @@ foreach (int chapter in toRun)
     Console.WriteLine($"\n=== Chapter {chapter}: {titles[chapter]} ===");
     switch (chapter)
     {
-        case 3: Ch03Basics.Run(); break;
-        case 4: Ch04Types.Run(); break;
-        case 5: Ch05ControlFlow.Run(); break;
-        case 6: Ch06Collections.Run(); break;
-        case 7: Ch07Methods.Run(); break;
-        case 8: Ch08Classes.Run(); break;
-        case 9: Ch09Interfaces.Run(); break;
-        case 10: Ch10Linq.Run(); break;
-        case 11: Ch11Exceptions.Run(); break;
-        case 12: await Ch12Async.RunAsync(); break;
-        case 13: Ch13Orders.Run(); break;
+        case 3:
+            Ch03Basics.Run();
+            break;
+        case 4:
+            Ch04Types.Run();
+            break;
+        case 5:
+            Ch05ControlFlow.Run();
+            break;
+        case 6:
+            Ch06Collections.Run();
+            break;
+        case 7:
+            Ch07Methods.Run();
+            break;
+        case 8:
+            Ch08Classes.Run();
+            break;
+        case 9:
+            Ch09Interfaces.Run();
+            break;
+        case 10:
+            Ch10Linq.Run();
+            break;
+        case 11:
+            Ch11Exceptions.Run();
+            break;
+        case 12:
+            await Ch12Async.RunAsync();
+            break;
+        case 13:
+            Ch13Orders.Run();
+            break;
     }
 }

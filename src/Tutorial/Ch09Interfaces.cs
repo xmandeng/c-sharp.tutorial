@@ -15,20 +15,21 @@ public interface IShape
 // and leaves some members for them to fill in.
 public abstract class Shape : IShape
 {
-    public abstract string Name { get; }      // subclasses MUST override
+    public abstract string Name { get; } // subclasses MUST override
     public abstract double Area();
 
     // virtual: subclasses MAY override
     public virtual string Describe() => $"{Name} with area {Area():F2}";
 }
 
-public class Circle : Shape                   // Python: class Circle(Shape):
+public class Circle : Shape // Python: class Circle(Shape):
 {
     public double Radius { get; }
 
     public Circle(double radius) => Radius = radius;
 
     public override string Name => "Circle";
+
     public override double Area() => Math.PI * Radius * Radius;
 }
 
@@ -44,6 +45,7 @@ public class Rectangle : Shape
     }
 
     public override string Name => "Rectangle";
+
     public override double Area() => Width * Height;
 }
 
@@ -51,9 +53,11 @@ public class Rectangle : Shape
 // : base(...) calls the parent constructor (Python: super().__init__(...))
 public sealed class Square : Rectangle
 {
-    public Square(double side) : base(side, side) { }
+    public Square(double side)
+        : base(side, side) { }
 
     public override string Name => "Square";
+
     public override string Describe() => base.Describe() + " (all sides equal)";
 }
 
@@ -65,7 +69,7 @@ public static class Ch09Interfaces
         double total = 0;
         foreach (var shape in shapes)
         {
-            total += shape.Area();            // each object runs its own Area()
+            total += shape.Area(); // each object runs its own Area()
         }
         return total;
     }
@@ -74,7 +78,9 @@ public static class Ch09Interfaces
     {
         var shapes = new List<Shape>
         {
-            new Circle(1), new Rectangle(2, 3), new Square(2),
+            new Circle(1),
+            new Rectangle(2, 3),
+            new Square(2),
         };
 
         foreach (var shape in shapes)

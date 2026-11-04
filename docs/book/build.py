@@ -79,10 +79,12 @@ def excerpt(path: str, spec: str, after: int) -> tuple[int, int, list[str]]:
     "A"       -> the line containing A, plus the rest of its { } block or statement.
     "A ..> B" -> from the line containing A through the line containing B, then
                  on until any braces opened in that range are closed.
+    "A ..= B" -> exactly from A through B, leaving braces open (a header excerpt).
     Comment and [Attribute] lines directly above the first line are included.
     """
     lines = (ROOT / path).read_text().splitlines()
-    a, _, b = (x.strip() for x in spec.partition("..>"))
+    exact = "..=" in spec
+    a, _, b = (x.strip() for x in spec.partition("..=" if exact else "..>"))
 
     def find(text: str, frm: int) -> int:
         for i in range(frm, len(lines)):
@@ -95,12 +97,15 @@ def excerpt(path: str, spec: str, after: int) -> tuple[int, int, list[str]]:
     while first > 0 and lines[first - 1].strip().startswith(("//", "[")):
         first -= 1
     stop_at = find(b, start) if b else start
-    depth, opened, i = 0, False, start
+    if exact:
+        return first, stop_at, lines[first:stop_at + 1]
+    depth, parens, opened, i = 0, 0, False, start
     while True:
         code = code_part(lines[i])
         depth += code.count("{") - code.count("}")
+        parens += code.count("(") - code.count(")")
         opened = opened or depth > 0
-        done = i >= stop_at and (
+        done = i >= stop_at and parens <= 0 and (
             (opened and depth <= 0) or (not opened and code.rstrip().endswith(";"))
             or (b and depth <= 0))
         if done:

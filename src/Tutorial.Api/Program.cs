@@ -1,6 +1,7 @@
 // A minimal ASP.NET Core web API over the Chapter 11 order code.
 //   dotnet run --project src/Tutorial.Api
 //   curl http://localhost:5239/products
+using Tutorial.Api;
 using Tutorial.Orders;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -22,42 +23,54 @@ foreach (var sku in catalog.Keys)
 builder.Services.AddSingleton(catalog);
 builder.Services.AddSingleton(inventory);
 builder.Services.AddSingleton<IDiscountPolicy>(new BulkDiscount(100m, 0.10m));
-builder.Services.AddSingleton<OrderService>();   // DI calls its constructor
+builder.Services.AddSingleton<OrderService>(); // DI calls its constructor
 
 var app = builder.Build();
 
 // 2. Map URLs to handler lambdas. ASP.NET fills each parameter from the
 //    URL, the JSON request body, or the DI container.
-app.MapGet("/products", (Dictionary<string, Product> catalog) => catalog.Values);
+app.MapGet(
+    "/products",
+    (Dictionary<string, Product> catalog) => catalog.Values
+);
 
-app.MapGet("/stock/{sku}", (string sku, Inventory inventory) =>
-    Results.Ok(new { sku, inStock = inventory.StockOf(sku) }));
+app.MapGet(
+    "/stock/{sku}",
+    (string sku, Inventory inventory) =>
+        Results.Ok(new { sku, inStock = inventory.StockOf(sku) })
+);
 
-app.MapPost("/orders", (OrderRequest request,
-                        Dictionary<string, Product> catalog,
-                        OrderService service) =>
-{
-    var order = new Order($"ORD-{Random.Shared.Next(1000, 9999)}", request.Customer);
-    try
+app.MapPost(
+    "/orders",
+    (
+        OrderRequest request,
+        Dictionary<string, Product> catalog,
+        OrderService service
+    ) =>
     {
-        foreach (var line in request.Lines)
+        var order = new Order(
+            $"ORD-{Random.Shared.Next(1000, 9999)}",
+            request.Customer
+        );
+        try
         {
-            if (!catalog.TryGetValue(line.Sku, out Product? product))
+            foreach (var line in request.Lines)
             {
-                return Results.NotFound(new { error = $"Unknown SKU {line.Sku}" });
+                if (!catalog.TryGetValue(line.Sku, out Product? product))
+                {
+                    return Results.NotFound(
+                        new { error = $"Unknown SKU {line.Sku}" }
+                    );
+                }
+                order.Add(product, line.Quantity);
             }
-            order.Add(product, line.Quantity);
+            return Results.Ok(service.Checkout(order)); // record -> JSON
         }
-        return Results.Ok(service.Checkout(order));   // record -> JSON
+        catch (Exception ex) when (ex is OrderException or ArgumentException)
+        {
+            return Results.BadRequest(new { error = ex.Message });
+        }
     }
-    catch (Exception ex) when (ex is OrderException or ArgumentException)
-    {
-        return Results.BadRequest(new { error = ex.Message });
-    }
-});
+);
 
-app.Run();
-
-// The JSON body of POST /orders. JSON {"customer": ...} maps to Customer.
-public record LineRequest(string Sku, int Quantity);
-public record OrderRequest(string Customer, List<LineRequest> Lines);
+await app.RunAsync();

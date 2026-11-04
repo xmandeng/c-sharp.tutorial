@@ -1,0 +1,11 @@
+{
+    // Format C# with CSharpier on every save (the C# side of ruff format).
+    "[csharp]": {
+        "editor.defaultFormatter": "csharpier.csharpier-vscode",
+        "editor.formatOnSave": true
+    },
+    "files.exclude": {
+        "**/bin": true,
+        "**/obj": true
+    }
+}

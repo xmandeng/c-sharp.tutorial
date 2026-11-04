@@ -1,0 +1,15 @@
+<!-- Settings shared by every project in the solution. -->
+<Project>
+  <PropertyGroup>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+
+    <!-- Linting: the SDK's built-in analyzers at the "recommended" rule set, and the
+         .editorconfig style rules enforced at build time (the C# side of `ruff check`). -->
+    <AnalysisLevel>latest-recommended</AnalysisLevel>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+
+    <!-- Write packages.lock.json per project (the C# side of uv.lock). -->
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+  </PropertyGroup>
+</Project>

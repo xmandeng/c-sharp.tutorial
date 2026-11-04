@@ -15,7 +15,9 @@ public static class Ch11Exceptions
         if (qty < 0)
         {
             throw new ArgumentOutOfRangeException(
-                nameof(text), "Quantity cannot be negative.");
+                nameof(text),
+                "Quantity cannot be negative."
+            );
         }
         return qty;
     }
@@ -28,7 +30,7 @@ public static class Ch11Exceptions
             {
                 Console.WriteLine($"parsed {ParseQuantity(input)}");
             }
-            catch (FormatException ex)          // Python: except ValueError as ex
+            catch (FormatException ex) // Python: except ValueError as ex
             {
                 Console.WriteLine($"bad format: {ex.Message}");
             }
@@ -36,7 +38,7 @@ public static class Ch11Exceptions
             {
                 Console.WriteLine($"out of range: parameter '{ex.ParamName}'");
             }
-            finally                             // always runs
+            finally // always runs
             {
                 Console.WriteLine($"  (checked '{input}')");
             }
@@ -61,7 +63,7 @@ public static class Ch11Exceptions
 }
 
 // IDisposable is the interface "using" relies on (Python: __enter__/__exit__)
-public class TempLog : IDisposable
+public sealed class TempLog : IDisposable
 {
     private readonly string _name;
 
@@ -71,7 +73,8 @@ public class TempLog : IDisposable
         Console.WriteLine($"open {_name}");
     }
 
-    public void Write(string message) => Console.WriteLine($"[{_name}] {message}");
+    public void Write(string message) =>
+        Console.WriteLine($"[{_name}] {message}");
 
     public void Dispose() => Console.WriteLine($"close {_name}");
 }

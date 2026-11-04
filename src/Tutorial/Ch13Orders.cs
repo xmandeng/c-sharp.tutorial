@@ -28,7 +28,7 @@ public static class Ch13Orders
         PrintReceipt(service.Checkout(large));
 
         var tooMany = new Order("ORD-3", "Linus");
-        tooMany.Add(monitor, 1);          // the only monitor was sold in ORD-2
+        tooMany.Add(monitor, 1); // the only monitor was sold in ORD-2
         try
         {
             service.Checkout(tooMany);
@@ -43,7 +43,9 @@ public static class Ch13Orders
 
     private static void PrintReceipt(Receipt r)
     {
-        Console.WriteLine($"{r.OrderId}: subtotal {r.Subtotal:0.00} - discount {r.Discount:0.00} " +
-                          $"+ tax {r.Tax:0.00} = {r.Total:0.00}");
+        Console.WriteLine(
+            $"{r.OrderId}: subtotal {r.Subtotal:0.00} - discount {r.Discount:0.00} "
+                + $"+ tax {r.Tax:0.00} = {r.Total:0.00}"
+        );
     }
 }

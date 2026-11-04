@@ -9,10 +9,30 @@ jobs:
   build-and-test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-dotnet@v5
         with:
           global-json-file: global.json
-      - run: dotnet build --warnaserror
-      - run: dotnet test --no-build
-      - run: dotnet run --project src/Tutorial --no-build
+
+      - name: Restore tools and packages (lock files must match)
+        run: |
+          dotnet tool restore
+          dotnet restore --locked-mode
+
+      - name: Check formatting (CSharpier)
+        run: dotnet csharpier check .
+
+      - name: Build with analyzers as errors
+        run: dotnet build --no-restore --warnaserror
+
+      - name: Test with coverage
+        run: dotnet test --no-build --coverage --coverage-output-format cobertura --coverage-output coverage.cobertura.xml
+
+      - name: Coverage summary
+        run: |
+          dotnet reportgenerator -reports:TestResults/coverage.cobertura.xml -targetdir:coverage-report \
+            -reporttypes:MarkdownSummaryGithub -assemblyfilters:"+Tutorial*;-Tutorial.Tests"
+          cat coverage-report/SummaryGithub.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Run every chapter demo
+        run: dotnet run --project src/Tutorial --no-build
